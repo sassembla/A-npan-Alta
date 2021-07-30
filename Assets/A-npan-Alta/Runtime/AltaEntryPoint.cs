@@ -28,12 +28,21 @@ class AltaEntryPoint
                 if (remoteSocket == null)
                 {
                     remoteSocket = newConnection;
-                    remoteSocket.OnMessage = received =>
+                    remoteSocket.OnMessage = segments =>
                     {
-                        Debug.Log("接続とデータがきた:" + received.Count);
-                        remoteSocket.Send(new byte[] { 4, 5, 6, 7 });
+                        while (0 < segments.Count)
+                        {
+                            var data = segments.Dequeue();
+                            var bytes = new byte[data.Count];
+                            Buffer.BlockCopy(data.Array, data.Offset, bytes, 0, data.Count);
+
+                            Debug.Log("body received:" + string.Join(", ", bytes));
+
+                            // 送り返す
+                            remoteSocket.Send(new byte[] { 4, 5, 6, 7 });
+                        }
                     };
-                }
+                };
             }
         );
 

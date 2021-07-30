@@ -8,7 +8,15 @@ class AltaEntryPoint
     [RuntimeInitializeOnLoadMethod]
     static void EntryPoint()
     {
+
+        // エディタのみの場合、サーバ起動
+#if UNITY_EDITOR
         entry = new AltaEntryPoint();
+        return;
+#endif
+
+        // 実機シミュに繋ぐ場合、エディタでは繋がない(繋いでもいいのかもね〜)
+        var go = new GameObject().AddComponent<AltaDummyViewClient>();
     }
 
 
@@ -50,7 +58,5 @@ class AltaEntryPoint
         {
             server?.Dispose();
         };
-
-        var go = new GameObject().AddComponent<AltaDummyViewClient>();
     }
 }

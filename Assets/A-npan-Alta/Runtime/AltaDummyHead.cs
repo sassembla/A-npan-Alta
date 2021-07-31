@@ -2,9 +2,9 @@ using System;
 using UnityEngine;
 using WebuSocketCore;
 
-public class AltaDummyViewClient : MonoBehaviour
+public class AltaDummyHead : MonoBehaviour
 {
-    void Start()
+    void Awake()
     {
         Debug.Log("dummy head 起動");
         WebuSocket ws = null;

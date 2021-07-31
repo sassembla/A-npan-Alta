@@ -3,7 +3,7 @@
 	archiveVersion = 1;
 	classes = {
 	};
-	objectVersion = 50;
+	objectVersion = 52;
 	objects = {
 
 /* Begin PBXBuildFile section */
@@ -14,6 +14,7 @@
 		2623891226B459EA006DBE29 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 2623891126B459EA006DBE29 /* Assets.xcassets */; };
 		2623891526B459EA006DBE29 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 2623891326B459EA006DBE29 /* LaunchScreen.storyboard */; };
 		2623891E26B45A1F006DBE29 /* Network.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 2623891D26B45A1F006DBE29 /* Network.framework */; };
+		2623892126B59250006DBE29 /* Starscream in Frameworks */ = {isa = PBXBuildFile; productRef = 2623892026B59250006DBE29 /* Starscream */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -34,6 +35,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				2623891E26B45A1F006DBE29 /* Network.framework in Frameworks */,
+				2623892126B59250006DBE29 /* Starscream in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -95,6 +97,9 @@
 			dependencies = (
 			);
 			name = "A-npan-Alta-iOSHead";
+			packageProductDependencies = (
+				2623892026B59250006DBE29 /* Starscream */,
+			);
 			productName = "A-npan-Alta-iOSHead";
 			productReference = 2623890526B459E8006DBE29 /* A-npan-Alta-iOSHead.app */;
 			productType = "com.apple.product-type.application";
@@ -122,6 +127,9 @@
 				Base,
 			);
 			mainGroup = 262388FC26B459E8006DBE29;
+			packageReferences = (
+				2623891F26B59250006DBE29 /* XCRemoteSwiftPackageReference "Starscream" */,
+			);
 			productRefGroup = 2623890626B459E8006DBE29 /* Products */;
 			projectDirPath = "";
 			projectRoot = "";
@@ -351,6 +359,25 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		2623891F26B59250006DBE29 /* XCRemoteSwiftPackageReference "Starscream" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/daltoniam/Starscream.git";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 4.0.4;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		2623892026B59250006DBE29 /* Starscream */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 2623891F26B59250006DBE29 /* XCRemoteSwiftPackageReference "Starscream" */;
+			productName = Starscream;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = 262388FD26B459E8006DBE29 /* Project object */;
 }

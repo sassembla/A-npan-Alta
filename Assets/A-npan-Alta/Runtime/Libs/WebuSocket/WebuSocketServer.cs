@@ -763,7 +763,7 @@ Sec-WebSocket-Accept: " + acceptedSecret + "\r\n\r\n";
             tcpListener.AcceptTcpClientAsync().ContinueWith(
                 tcpClientTask =>
                 {
-                    Debug.Log("接続きてる");
+                    Debug.Log("接続がきてる");
                     var client = tcpClientTask.Result.Client;
                     StartReading(client);
 

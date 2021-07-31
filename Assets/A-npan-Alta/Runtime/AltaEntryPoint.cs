@@ -5,18 +5,55 @@ using WebuSocketCore.Server;
 class AltaEntryPoint
 {
     private static AltaEntryPoint entry;
+
     [RuntimeInitializeOnLoadMethod]
     static void EntryPoint()
     {
+        /*
+            存在する組み合わせは、
+            Unity Body からPluginの起動後、
 
-        // エディタのみの場合、サーバ起動
-#if UNITY_EDITOR
+            * Head -> Bodyへの接続
+                実機で実際に起こること
+                TODO: これためそう。ということはStarscreamをswiftで動かせるようなコードを描かねば。
+
+            or
+            
+            * DummyHead -> Bodyへの接続
+                エディタで起きること
+                TODO: これはデバッグに重宝するはず、モックデータとかを取り出したりしたい。API作るのもここを参考にすると良さそう。
+
+            or
+            
+            * 別Head -> Bodyへの接続
+                デバッグ目的で別からの接続がきた時、それをもって接続状態とかを表示できないといけないね。
+                実機をこのモードで再起動できるようなデバッグオプションが必要だね。RELEASEタグついてなければデバッグUIをUnity側で出すか。
+        */
+
+        // サーバの立ち上げ
         entry = new AltaEntryPoint();
-        return;
+
+        Debug.Log("サーバ構築まで完了、このあとにheadがws接続すれば良い。");
+        entry.InitializeHead();
+
+        // ダミー
+        // これは別にどうでもいいことだが、シミュレータに接続できた。
+        // var go = new GameObject().AddComponent<AltaDummyHead>();
+    }
+
+
+
+
+#if UNITY_IOS && !UNITY_EDITOR
+    [System.Runtime.InteropServices.DllImport("__Internal")]
+    static extern void initialize(string message);
 #endif
 
-        // 実機シミュに繋ぐ場合、エディタでは繋がない(繋いでもいいのかもね〜)
-        var go = new GameObject().AddComponent<AltaDummyViewClient>();
+    private void InitializeHead()
+    {
+#if UNITY_IOS && !UNITY_EDITOR
+        initialize("test");
+#endif
     }
 
 
@@ -33,8 +70,11 @@ class AltaEntryPoint
             1129,
             newConnection =>
             {
+                // 一つ目の通信をチェック、適合しなかったら弾かないといけない。
+                // TODO: ここを頑丈にしないといけない。
                 if (remoteSocket == null)
                 {
+                    Debug.Log("WebuSocketServer connection received.");
                     remoteSocket = newConnection;
                     remoteSocket.OnMessage = segments =>
                     {

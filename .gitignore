@@ -7,3 +7,4 @@ Temp/*
 *.csproj
 *.cache
 iOS/*
+iOS-device/*

@@ -8,3 +8,5 @@ Temp/*
 *.cache
 iOS/*
 iOS-device/*
+android.apk
+android/*

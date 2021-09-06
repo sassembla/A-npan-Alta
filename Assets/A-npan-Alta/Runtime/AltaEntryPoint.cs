@@ -44,14 +44,44 @@ class AltaEntryPoint
 
 
 
-#if UNITY_IOS && !UNITY_EDITOR
+#if UNITY_IOS
     [System.Runtime.InteropServices.DllImport("__Internal")]
     static extern void initialize(string message);
 #endif
 
+#if UNITY_ANDROID
+    static void initialize(string message)
+    {
+        try
+        {
+            using (AndroidJavaObject jo = new AndroidJavaObject("a_npan_alta.head.Bridge"))
+            {
+                using (var player = new AndroidJavaClass("com.unity3d.player.UnityPlayer"))
+                using (var activity = player.GetStatic<AndroidJavaObject>("currentActivity"))
+                using (var context = activity.Call<AndroidJavaObject>("getApplicationContext"))
+                {
+                    Debug.Log("context:" + context + " message:" + message);
+                    jo.Call("initialize", context, message);
+                }
+            }
+        }
+        catch (Exception e)
+        {
+            Debug.LogError("e:" + e);
+        }
+    }
+#endif
+
+
+
     private void InitializeHead()
     {
-#if UNITY_IOS && !UNITY_EDITOR
+        // TODO: 条件が適当なので調整する
+#if UNITY_EDITOR
+        return;
+#endif
+
+#if UNITY_IOS || UNITY_ANDROID
         initialize("test");
 #endif
     }
@@ -74,7 +104,7 @@ class AltaEntryPoint
                 // TODO: ここを頑丈にしないといけない。
                 if (remoteSocket == null)
                 {
-                    Debug.Log("WebuSocketServer connection received.");
+                    Debug.Log("WebuSocketServer connection received. やったぜ！！！");
                     remoteSocket = newConnection;
                     remoteSocket.OnMessage = segments =>
                     {

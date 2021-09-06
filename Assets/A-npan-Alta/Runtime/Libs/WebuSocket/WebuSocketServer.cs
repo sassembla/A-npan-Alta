@@ -61,6 +61,8 @@ namespace WebuSocketCore.Server
 
         public ClientConnection(string id, int baseReceiveBufferSize, Socket socket, Action<ClientConnection> onConnected)
         {
+            Debug.Log("connection生成");
+
             this.connectionId = id;
             this.baseReceiveBufferSize = baseReceiveBufferSize;
             this.OnConnected = onConnected;
@@ -122,6 +124,7 @@ namespace WebuSocketCore.Server
 
         private void OnReceived(object unused, SocketAsyncEventArgs args)
         {
+            Debug.Log("OnReceived");
             var token = (ServerSocketToken)args.UserToken;
 
             if (args.SocketError != SocketError.Success)
@@ -168,6 +171,7 @@ namespace WebuSocketCore.Server
             {
                 case SocketState.WS_HANDSHAKING:
                     {
+                        Debug.Log("handshake!");
                         var receivedData = new byte[args.BytesTransferred];
                         Buffer.BlockCopy(args.Buffer, 0, receivedData, 0, receivedData.Length);
 
@@ -242,10 +246,10 @@ namespace WebuSocketCore.Server
                                     return;
                                 }
 
-                                // foreach (var a in clientRequestHeaders)
-                                // {
-                                //     Debug.Log("a:" + a.Key + " v:" + a.Value);
-                                // }
+                                foreach (var a in clientRequestHeaders)
+                                {
+                                    Debug.Log("a:" + a.Key + " v:" + a.Value);
+                                }
 
                                 /*
                                     Sec-WebSocket-Key(key) の末尾の空白を覗いた値を準備
@@ -266,6 +270,7 @@ Upgrade: websocket
 Sec-WebSocket-Accept: " + acceptedSecret + "\r\n\r\n";
                                 var responseBytes = Encoding.UTF8.GetBytes(responseStr);
 
+                                Debug.Log("送り返してる");
                                 token.socket.BeginSend(
                                     responseBytes,
                                     0,
@@ -273,6 +278,7 @@ Sec-WebSocket-Accept: " + acceptedSecret + "\r\n\r\n";
                                     SocketFlags.None,
                                     result =>
                                     {
+                                        Debug.Log("うーん、接続の結果までは帰ってきてるな");
                                         var s = (Socket)result.AsyncState;
                                         var len = s.EndSend(result);
 
@@ -323,6 +329,7 @@ Sec-WebSocket-Accept: " + acceptedSecret + "\r\n\r\n";
                                     },
                                     socketToken.socket
                                 );
+                                Debug.Log("はい");
                                 return;
                             }
                         }
@@ -682,6 +689,7 @@ Sec-WebSocket-Accept: " + acceptedSecret + "\r\n\r\n";
 
         private void ReadyReceivingNewData(ServerSocketToken token)
         {
+            Debug.Log("ReadyReceivingNewData");
             token.receiveArgs.SetBuffer(token.receiveBuffer, 0, token.receiveBuffer.Length);
             if (!token.socket.ReceiveAsync(token.receiveArgs)) OnReceived(token.socket, token.receiveArgs);
         }
@@ -753,9 +761,16 @@ Sec-WebSocket-Accept: " + acceptedSecret + "\r\n\r\n";
         private void StartServing(int port)
         {
             // tcpListenerを使い、tcpClientを受け付ける。が、最終的には内部のsocketを取り出して通信している。networkStreamがクソすぎる。
-            var tcpListener = TcpListener.Create(port);
-            tcpListener.Start();
-            AcceptNewClient(tcpListener);
+            try
+            {
+                var tcpListener = TcpListener.Create(port);
+                tcpListener.Start();
+                AcceptNewClient(tcpListener);
+            }
+            catch (Exception e)
+            {
+                Debug.LogError("サーバの建立に失敗した e:" + e);
+            }
         }
 
         private void AcceptNewClient(TcpListener tcpListener)
@@ -763,7 +778,7 @@ Sec-WebSocket-Accept: " + acceptedSecret + "\r\n\r\n";
             tcpListener.AcceptTcpClientAsync().ContinueWith(
                 tcpClientTask =>
                 {
-                    Debug.Log("接続がきてる");
+                    Debug.Log("tcp接続がきてる、このあとwsをセットできるかどうか。");
                     var client = tcpClientTask.Result.Client;
                     StartReading(client);
 
@@ -775,7 +790,14 @@ Sec-WebSocket-Accept: " + acceptedSecret + "\r\n\r\n";
 
         private void StartReading(Socket socket)
         {
-            var connection = new ClientConnection(Guid.NewGuid().ToString(), 10240, socket, OnConnected);
+            try
+            {
+                var connection = new ClientConnection(Guid.NewGuid().ToString(), 10240, socket, OnConnected);
+            }
+            catch (Exception e)
+            {
+                Debug.LogError("e:" + e);
+            }
         }
 
 

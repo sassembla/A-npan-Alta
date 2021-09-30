@@ -2,7 +2,7 @@ using System;
 using UnityEngine;
 using WebuSocketCore.Server;
 
-class AltaEntryPoint
+public class AltaEntryPoint
 {
     private static AltaEntryPoint entry;
 
@@ -50,18 +50,18 @@ class AltaEntryPoint
 #endif
 
 #if UNITY_ANDROID
+    private static AndroidJavaObject jo;
     static void initialize(string message)
     {
         try
         {
-            using (AndroidJavaObject jo = new AndroidJavaObject("a_npan_alta.head.Bridge"))
+            jo = new AndroidJavaObject("a_npan_alta.head.Bridge");
             {
                 using (var player = new AndroidJavaClass("com.unity3d.player.UnityPlayer"))
                 using (var activity = player.GetStatic<AndroidJavaObject>("currentActivity"))
-                using (var context = activity.Call<AndroidJavaObject>("getApplicationContext"))
                 {
-                    Debug.Log("context:" + context + " message:" + message);
-                    jo.Call("initialize", context, message);
+                    Debug.Log("activity:" + activity + " message:" + message);
+                    jo.Call("initialize", activity, message);
                 }
             }
         }
@@ -70,8 +70,21 @@ class AltaEntryPoint
             Debug.LogError("e:" + e);
         }
     }
+
+    static void finish()
+    {
+        try
+        {
+            jo.Call("finish");
+        }
+        catch (Exception e)
+        {
+            Debug.Log("Uniyt error: e:" + e);
+        }
+    }
 #endif
 
+    public static Action Finish;
 
 
     private void InitializeHead()
@@ -83,6 +96,12 @@ class AltaEntryPoint
 
 #if UNITY_IOS || UNITY_ANDROID
         initialize("test");
+
+#if UNITY_ANDROID
+        // TODO: Androidのみ、finish関数を実装済み
+        Finish = finish;
+#endif
+        var a = new GameObject().AddComponent<A>();
 #endif
     }
 

@@ -134,9 +134,7 @@ public class AltaEntryPoint
                             Buffer.BlockCopy(data.Array, data.Offset, bytes, 0, data.Count);
 
                             Debug.Log("body received:" + string.Join(", ", bytes));
-
-                            // 送り返す
-                            remoteSocket.Send(new byte[] { 4, 5, 6, 7 });
+                            OnReceived(bytes);
                         }
                     };
                 };
@@ -147,5 +145,16 @@ public class AltaEntryPoint
         {
             server?.Dispose();
         };
+    }
+
+    private Action<byte[]> onReceived = bytes => { };
+    private void OnReceived(byte[] data)
+    {
+        onReceived(data);
+    }
+
+    public static void SetOnReceived(Action<byte[]> onReceived)
+    {
+        entry.onReceived = onReceived;
     }
 }

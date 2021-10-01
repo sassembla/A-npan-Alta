@@ -123,7 +123,6 @@ namespace WebuSocketCore.Server
 
         private void OnReceived(object unused, SocketAsyncEventArgs args)
         {
-            Debug.Log("あれー、接続きてない？ これ今はたぶんdisconnectがきてるな");
             var token = (ServerSocketToken)args.UserToken;
 
             if (args.SocketError != SocketError.Success)
@@ -156,7 +155,7 @@ namespace WebuSocketCore.Server
 
             if (args.BytesTransferred == 0)
             {
-                // Debug.LogError("failed to receive. args.BytesTransferred = 0." + " args.SocketError:" + args.SocketError);
+                Debug.LogError("failed to receive. args.BytesTransferred = 0." + " args.SocketError:" + args.SocketError);
                 // if (OnError != null)
                 // {
                 //     var error = new Exception("failed to receive. args.BytesTransferred = 0." + " args.SocketError:" + args.SocketError);
@@ -166,6 +165,7 @@ namespace WebuSocketCore.Server
                 return;
             }
 
+            Debug.Log("あれー、接続きてない？ これ今はたぶんdisconnectがきてるな");
             switch (token.socketState)
             {
                 case SocketState.WS_HANDSHAKING:
@@ -268,7 +268,6 @@ Upgrade: websocket
 Sec-WebSocket-Accept: " + acceptedSecret + "\r\n\r\n";
                                 var responseBytes = Encoding.UTF8.GetBytes(responseStr);
 
-                                Debug.Log("送り返してる");
                                 token.socket.BeginSend(
                                     responseBytes,
                                     0,
@@ -276,7 +275,6 @@ Sec-WebSocket-Accept: " + acceptedSecret + "\r\n\r\n";
                                     SocketFlags.None,
                                     result =>
                                     {
-                                        Debug.Log("うーん、接続の結果までは帰ってきてるな");
                                         var s = (Socket)result.AsyncState;
                                         var len = s.EndSend(result);
 
@@ -327,7 +325,6 @@ Sec-WebSocket-Accept: " + acceptedSecret + "\r\n\r\n";
                                     },
                                     socketToken.socket
                                 );
-                                Debug.Log("はい");
                                 return;
                             }
                         }

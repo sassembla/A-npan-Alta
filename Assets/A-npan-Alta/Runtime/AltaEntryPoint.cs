@@ -4,19 +4,31 @@ using WebuSocketCore.Server;
 
 public class AltaEntryPoint
 {
+    public enum AltaMode
+    {
+        None,
+        EditorOnly,
+        ConnectFromDevice,
+        ConnectFromDeviceToEditor,
+
+    }
     private static AltaEntryPoint entry;
 
     [RuntimeInitializeOnLoadMethod]
     static void EntryPoint()
     {
+        // TODO: ここを、それぞれの環境で内部保持したものをUIから書き換えて使えるようにしたい。
+        var mode = AltaMode.ConnectFromDeviceToEditor;
+
         /*
             存在する組み合わせは、
             Unity Body からPluginの起動後、
 
             * Head -> Bodyへの接続
                 実機で実際に起こること
-                TODO: これためそう。ということはStarscreamをswiftで動かせるようなコードを描かねば。
-
+                これためそう。ということはStarscreamをswiftで動かせるようなコードを描かねば。 -> できた
+                TODO: 依存を含めたビルドの自動化が必要、丸っと別のところからプロジェクトを持ってくる、import処理かあ。Unityのビルドが後に来るパターンが主流。
+                TODO: StarscreamをiOS側で使うには、BuildSystemを更新する + Starscreamをspmで持ってくる、が必要。
             or
             
             * DummyHead -> Bodyへの接続
@@ -27,18 +39,25 @@ public class AltaEntryPoint
             
             * 別Head -> Bodyへの接続
                 デバッグ目的で別からの接続がきた時、それをもって接続状態とかを表示できないといけないね。
-                実機をこのモードで再起動できるようなデバッグオプションが必要だね。RELEASEタグついてなければデバッグUIをUnity側で出すか。
+                実機をこのモードで再起動できるようなデバッグオプションが必要だね。ALTA_RELEASEタグついてなければデバッグUIをUnity側で出すか。
+
         */
 
         // サーバの立ち上げ
-        entry = new AltaEntryPoint();
+        entry = new AltaEntryPoint(mode);
 
         Debug.Log("サーバ構築まで完了、このあとにheadがws接続すれば良い。");
         entry.InitializeHead();
 
         // ダミー
-        // これは別にどうでもいいことだが、シミュレータに接続できた。
-        // var go = new GameObject().AddComponent<AltaDummyHead>();
+        // TODO: これは別にどうでもいいことだが、シミュレータに接続できた。混乱するからたぶん禁止した方がいい
+        switch (mode)
+        {
+            case AltaMode.EditorOnly:
+                // エディタのみで動作する場合のダミーヘッド、あんまり出番がなさそうだが一応。
+                var go = new GameObject().AddComponent<AltaDummyHead>();
+                break;
+        }
     }
 
 
@@ -89,7 +108,7 @@ public class AltaEntryPoint
 
     private void InitializeHead()
     {
-        // TODO: 条件が適当なので調整する
+        // TODO: 条件が適当なので調整する。
 #if UNITY_EDITOR
         return;
 #endif
@@ -97,23 +116,42 @@ public class AltaEntryPoint
 #if UNITY_IOS || UNITY_ANDROID
         initialize("test");
 
+
+        {
 #if UNITY_ANDROID
         // TODO: Androidのみ、finish関数を実装済み
         Finish = finish;
-#endif
         var a = new GameObject().AddComponent<A>();
+#endif
+        }
+
 #endif
     }
 
 
     private WebuSocketServer server;
 
-    private AltaEntryPoint()
+    private AltaEntryPoint(AltaMode mode)
     {
         Debug.Log("alta-body is waking up.");
-        // TODO: Native側のAltaHeadEngineへの接続を行う。具体的にはNative側のモジュールを生成し、Unity側をサーバとして起動、Nativeモジュールからの接続を受け付ける。
-        // こうすると、Native側はTCP connectionを貼るだけで済む。Deallocationとかで破壊しても、再生が容易。
 
+        switch (mode)
+        {
+            case AltaMode.ConnectFromDevice:
+                // pass. 本番モード。開発中であればwsを使う。
+                break;
+            case AltaMode.ConnectFromDeviceToEditor:
+#if UNITY_EDITOR
+                // pass. サーバを立て、Editor上かシミュレータか実機から通信が来るのを待つ。
+                break;
+#endif
+
+                // シミュレータの場合、このモードであればサーバを内部に立てない。それだけで、Editor側に通信がいく。
+                // TODO: 実機の場合、
+                return;
+        }
+
+        // サーバを立てる
         ClientConnection remoteSocket = null;
         server = new WebuSocketServer(
             1129,
@@ -141,6 +179,7 @@ public class AltaEntryPoint
             }
         );
 
+        // TODO: 利用することがあれば。
         Action serverStop = () =>
         {
             server?.Dispose();

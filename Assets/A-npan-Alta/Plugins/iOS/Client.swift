@@ -8,36 +8,37 @@
 
 import Foundation
 import Network
-// import Starscream
 
 public class Client {
-    var initialViewCont:UIViewController
+//    var initialViewCont:UIViewController
     init() {
-        let window = UIApplication.shared.keyWindow!
-
-        // このクラスが属するバンドル（つまりUnityFramework.frameworkのバンドル）のBundleオブジェクトを取得
-        let currentBundle = Bundle(for: type(of: self))
-//        print("bundle:\(currentBundle)")
-
-        let storyboard = UIStoryboard(name: "TableSample", bundle: currentBundle)
-        let controller = storyboard.instantiateInitialViewController()!
+        // TODO: ここで、storyboardコントロール用のAPI、画面遷移を伝える機能、などの開発、調整を行う。
         
-        // これだとうまく描画されない
-//        window.addSubview(controller.view)
-        
-        controller.modalPresentationStyle = .fullScreen
-        
+//        let window = UIApplication.shared.keyWindow!
 //
-        initialViewCont = window.rootViewController!
-        print("initialViewCont", initialViewCont)
-        
-        window.rootViewController?.present(controller, animated: false, completion: {
-            let seconds = 4.0
-            DispatchQueue.main.asyncAfter(deadline: .now() + seconds) {
-                print("initialViewCont2", self.initialViewCont)
-                window.addSubview( self.initialViewCont.view)
-                window.rootViewController =  self.initialViewCont
-            }
-        })
+//        // このクラスが属するバンドル（つまりUnityFramework.frameworkのバンドル）のBundleオブジェクトを取得
+//        let currentBundle = Bundle(for: type(of: self))
+////        print("bundle:\(currentBundle)")
+//
+//        let storyboard = UIStoryboard(name: "TableSample", bundle: currentBundle)
+//        let controller = storyboard.instantiateInitialViewController()!
+//
+//        // これだとうまく描画されない
+////        window.addSubview(controller.view)
+//
+//        controller.modalPresentationStyle = .fullScreen
+//
+////
+//        initialViewCont = window.rootViewController!
+//        print("initialViewCont", initialViewCont)
+//
+//        window.rootViewController?.present(controller, animated: false, completion: {
+//            let seconds = 4.0
+//            DispatchQueue.main.asyncAfter(deadline: .now() + seconds) {
+//                print("initialViewCont2", self.initialViewCont)
+//                window.addSubview( self.initialViewCont.view)
+//                window.rootViewController =  self.initialViewCont
+//            }
+//        })
     }
 }

@@ -61,8 +61,6 @@ namespace WebuSocketCore.Server
 
         public ClientConnection(string id, int baseReceiveBufferSize, Socket socket, Action<ClientConnection> onConnected)
         {
-            Debug.Log("connection生成");
-
             this.connectionId = id;
             this.baseReceiveBufferSize = baseReceiveBufferSize;
             this.OnConnected = onConnected;
@@ -124,7 +122,6 @@ namespace WebuSocketCore.Server
 
         private void OnReceived(object unused, SocketAsyncEventArgs args)
         {
-            Debug.Log("OnReceived");
             var token = (ServerSocketToken)args.UserToken;
 
             if (args.SocketError != SocketError.Success)
@@ -689,7 +686,6 @@ Sec-WebSocket-Accept: " + acceptedSecret + "\r\n\r\n";
 
         private void ReadyReceivingNewData(ServerSocketToken token)
         {
-            Debug.Log("ReadyReceivingNewData");
             token.receiveArgs.SetBuffer(token.receiveBuffer, 0, token.receiveBuffer.Length);
             if (!token.socket.ReceiveAsync(token.receiveArgs)) OnReceived(token.socket, token.receiveArgs);
         }
@@ -778,7 +774,7 @@ Sec-WebSocket-Accept: " + acceptedSecret + "\r\n\r\n";
             tcpListener.AcceptTcpClientAsync().ContinueWith(
                 tcpClientTask =>
                 {
-                    Debug.Log("tcp接続がきてる、このあとwsをセットできるかどうか。");
+                    Debug.Log("alter bodyへのtcp接続 検知");
                     var client = tcpClientTask.Result.Client;
                     StartReading(client);
 

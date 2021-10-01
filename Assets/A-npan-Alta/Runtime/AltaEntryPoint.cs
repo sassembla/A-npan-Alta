@@ -158,8 +158,8 @@ public class AltaEntryPoint
             newConnection =>
             {
                 // 一つ目の通信をチェック、適合しなかったら弾かないといけない。
-                // TODO: ここを頑丈にしないといけない。
-                if (remoteSocket == null)
+                // TODO: ここを頑丈にしないといけない。後勝ちにしよう
+                if (true)
                 {
                     Debug.Log("WebuSocketServer connection received. やったぜ！！！");
                     remoteSocket = newConnection;

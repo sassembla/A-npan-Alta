@@ -61,6 +61,7 @@ namespace WebuSocketCore.Server
 
         public ClientConnection(string id, int baseReceiveBufferSize, Socket socket, Action<ClientConnection> onConnected)
         {
+            Debug.Log("ClientConnection!");
             this.connectionId = id;
             this.baseReceiveBufferSize = baseReceiveBufferSize;
             this.OnConnected = onConnected;
@@ -122,6 +123,7 @@ namespace WebuSocketCore.Server
 
         private void OnReceived(object unused, SocketAsyncEventArgs args)
         {
+            Debug.Log("あれー、接続きてない？ これ今はたぶんdisconnectがきてるな");
             var token = (ServerSocketToken)args.UserToken;
 
             if (args.SocketError != SocketError.Success)
@@ -190,8 +192,6 @@ namespace WebuSocketCore.Server
 
                         if (0 < webSocketHandshakeResult.Length)
                         {
-                            // clients.Add(new Client(stream, clientRequestHeaders, clientSecret));
-
                             var lineEndCursor = ReadUpgradeLine(webSocketHandshakeResult, 0, webSocketHandshakeResult.Length);
                             if (lineEndCursor != -1)
                             {
@@ -201,6 +201,7 @@ namespace WebuSocketCore.Server
                                 var clientRequestHeaders = new Dictionary<string, string>();
                                 foreach (var line in lines)
                                 {
+                                    Debug.Log("line:" + line);
                                     if (line.Length == 0 || string.IsNullOrEmpty(line))
                                     {
                                         continue;
@@ -774,7 +775,6 @@ Sec-WebSocket-Accept: " + acceptedSecret + "\r\n\r\n";
             tcpListener.AcceptTcpClientAsync().ContinueWith(
                 tcpClientTask =>
                 {
-                    Debug.Log("alter bodyへのtcp接続 検知");
                     var client = tcpClientTask.Result.Client;
                     StartReading(client);
 
@@ -788,6 +788,7 @@ Sec-WebSocket-Accept: " + acceptedSecret + "\r\n\r\n";
         {
             try
             {
+                Debug.Log("StartReading してる OnConnected:" + OnConnected);
                 var connection = new ClientConnection(Guid.NewGuid().ToString(), 10240, socket, OnConnected);
             }
             catch (Exception e)

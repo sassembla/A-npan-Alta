@@ -165,12 +165,10 @@ namespace WebuSocketCore.Server
                 return;
             }
 
-            Debug.Log("あれー、接続きてない？ これ今はたぶんdisconnectがきてるな");
             switch (token.socketState)
             {
                 case SocketState.WS_HANDSHAKING:
                     {
-                        Debug.Log("handshake!");
                         var receivedData = new byte[args.BytesTransferred];
                         Buffer.BlockCopy(args.Buffer, 0, receivedData, 0, receivedData.Length);
 
@@ -201,7 +199,6 @@ namespace WebuSocketCore.Server
                                 var clientRequestHeaders = new Dictionary<string, string>();
                                 foreach (var line in lines)
                                 {
-                                    Debug.Log("line:" + line);
                                     if (line.Length == 0 || string.IsNullOrEmpty(line))
                                     {
                                         continue;
@@ -244,10 +241,16 @@ namespace WebuSocketCore.Server
                                     return;
                                 }
 
-                                foreach (var a in clientRequestHeaders)
-                                {
-                                    Debug.Log("a:" + a.Key + " v:" + a.Value);
-                                }
+                                // TODO: accept compression.
+                                // // RFC 7692 PCME (per compression messsage extension)
+                                // if (clientRequestHeaders.ContainsKey("Sec-WebSocket-Extensions"))
+                                // {
+                                //     // Sec-WebSocket-Extensions: permessage-deflate
+                                //     if (clientRequestHeaders["Sec-WebSocket-Extensions"].Contains("permessage-deflate"))
+                                //     {
+                                //         isPCMEAccepted = true;
+                                //     }
+                                // }
 
                                 /*
                                     Sec-WebSocket-Key(key) の末尾の空白を覗いた値を準備
@@ -262,10 +265,15 @@ namespace WebuSocketCore.Server
                                 var responseStr =
 @"HTTP/1.1 101 Switching Protocols
 Server: webusocket
-Date: " + DateTime.UtcNow +
+Date: " + DateTime.UtcNow + "\r\n" +
 @"Connection: upgrade
 Upgrade: websocket
-Sec-WebSocket-Accept: " + acceptedSecret + "\r\n\r\n";
+Sec-WebSocket-Accept: " + acceptedSecret + "\r\n" +
+@"Sec-WebSocket-Extensions: permessage-deflate
+accept-encoding: deflate";
+
+                                responseStr = responseStr + "\r\n\r\n";
+
                                 var responseBytes = Encoding.UTF8.GetBytes(responseStr);
 
                                 token.socket.BeginSend(
@@ -793,7 +801,6 @@ Sec-WebSocket-Accept: " + acceptedSecret + "\r\n\r\n";
                 Debug.LogError("e:" + e);
             }
         }
-
 
         #region IDisposable Support
         private bool disposedValue = false; // To detect redundant calls

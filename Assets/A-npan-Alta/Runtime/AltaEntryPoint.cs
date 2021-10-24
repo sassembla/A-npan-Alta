@@ -130,10 +130,11 @@ public class AltaEntryPoint
 
 
     private WebuSocketServer server;
+    public ClientConnection remoteSocket;
 
     private AltaEntryPoint(AltaMode mode)
     {
-        Debug.Log("alta-body is waking up.");
+        Debug.Log("alta-body is waking up. mode:" + mode);
 
         switch (mode)
         {
@@ -148,11 +149,13 @@ public class AltaEntryPoint
 
                 // シミュレータの場合、このモードであればサーバを内部に立てない。それだけで、Editor側に通信がいく。
                 // TODO: 実機の場合、
+                Debug.Log("AltaEntryPoint mode:" + mode + " なので終了");
                 return;
         }
 
+        Debug.Log("サーバを建立");
+
         // サーバを立てる
-        ClientConnection remoteSocket = null;
         server = new WebuSocketServer(
             1129,
             newConnection =>
@@ -161,8 +164,8 @@ public class AltaEntryPoint
                 // TODO: ここを頑丈にしないといけない。後勝ちにしよう
                 if (true)
                 {
-                    Debug.Log("WebuSocketServer connection received. やったぜ！！！");
-                    remoteSocket = newConnection;
+                    Debug.Log("WebuSocketServer connection received. 接続確立でOnConnectedが着火した後に問題が出てる感じか。");
+                    remoteSocket = newConnection;// TODO: 適当に上書きしてる、後勝ちにしないなどの工夫が必要。最悪上積みをオールデリートする必要がある。
                     remoteSocket.OnMessage = segments =>
                     {
                         while (0 < segments.Count)
@@ -175,6 +178,9 @@ public class AltaEntryPoint
                             OnReceived(bytes);
                         }
                     };
+
+                    // 適当に4byte送り出す
+                    remoteSocket.Send(new byte[] { 0, 1, 2, 3 });
                 };
             }
         );
@@ -195,5 +201,10 @@ public class AltaEntryPoint
     public static void SetOnReceived(Action<byte[]> onReceived)
     {
         entry.onReceived = onReceived;
+    }
+
+    public static void Send(byte[] data)
+    {
+        entry.remoteSocket.Send(data);
     }
 }

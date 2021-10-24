@@ -37,20 +37,63 @@ class AltaHeadConnection_iOS_ws : NSObject, URLSessionWebSocketDelegate {
     }
 
     private func onReceive(incoming: Result<URLSessionWebSocketTask.Message, Error>) {
-        print("receiveしてる", incoming)
+//        print("receiveしてる", incoming)
         
-        // インターバルでデータを送ってみよう
-        webSocketTask?.send(URLSessionWebSocketTask.Message.string("here comes from client"), completionHandler: {e in
-            guard let err = e else {
-                print("send succeeded.")
-                return
+        switch(incoming){
+        case.success(let message):
+            print("message:", message)
+            switch message {
+            case .data(let bytes):
+                // 特定のシーンに該当するstoryboardを呼び出す
+                // この時点ではUInt8になってる
+                onGo(index: bytes[0])
+                break;
+            case .string(let str):
+                print("unexpected, server sent string:", str)
+                break;
+            default:
+                print("invalid data, server sent something wrong.")
             }
-            
-            print("error:", err)
-        })
+            break
+        
+        case .failure(let err):
+            break
+        }
+        
+        // TODO: 送信系、死活監視に使えるか？ ping-pongがあればそれでいい気はする
+//        webSocketTask?.send(URLSessionWebSocketTask.Message.string("here comes from client"), completionHandler: {e in
+//            guard let err = e else {
+//                print("send succeeded.")
+//                return
+//            }
+//
+//            print("error:", err)
+//        })
         
         // 継続待ち
         webSocketTask?.receive(completionHandler: onReceive)
+    }
+    
+    private func onGo(index:UInt8) {
+        /*
+             enum State
+             {
+                 None,
+                 ListView,
+                 TimeView,
+                 NewItemView
+             }
+         */
+        print("ここを自動生成で握れるとすごくよい、index-sceneマッピング。まあ握れると思うけど。")
+        
+        switch index {
+        case 1:
+            
+            break
+        default:
+            print("unknown index:", index)
+        }
+        
     }
     
     deinit {

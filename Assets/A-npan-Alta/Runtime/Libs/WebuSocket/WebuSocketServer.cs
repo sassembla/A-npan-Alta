@@ -1,10 +1,6 @@
 using System;
-using System.Collections;
 using System.Collections.Generic;
-using System.IO;
-using System.Net;
 using System.Net.Sockets;
-using System.Security.Cryptography;
 using System.Text;
 using UnityEngine;
 
@@ -45,6 +41,7 @@ namespace WebuSocketCore.Server
         }
     }
 
+    // クライアント接続単位で生成されるオブジェクト
     public class ClientConnection
     {
         public readonly string connectionId;
@@ -59,9 +56,9 @@ namespace WebuSocketCore.Server
 
         private string clientSecret;
 
+        // クライアント接続インスタンスの初期化
         public ClientConnection(string id, int baseReceiveBufferSize, Socket socket, Action<ClientConnection> onConnected)
         {
-            Debug.Log("ClientConnection!");
             this.connectionId = id;
             this.baseReceiveBufferSize = baseReceiveBufferSize;
             this.OnConnected = onConnected;

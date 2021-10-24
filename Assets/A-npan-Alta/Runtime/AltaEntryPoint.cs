@@ -2,7 +2,7 @@ using System;
 using UnityEngine;
 using WebuSocketCore.Server;
 
-public class AltaEntryPoint
+public partial class AltaEntryPoint
 {
     public enum AltaMode
     {
@@ -12,6 +12,7 @@ public class AltaEntryPoint
         ConnectFromDeviceToEditor,
 
     }
+
     private static AltaEntryPoint entry;
 
     [RuntimeInitializeOnLoadMethod]
@@ -49,13 +50,26 @@ public class AltaEntryPoint
         Debug.Log("サーバ構築まで完了、このあとにheadがws接続すれば良い。");
         entry.InitializeHead();
 
-        // ダミー
-        // TODO: これは別にどうでもいいことだが、シミュレータに接続できた。混乱するからたぶん禁止した方がいい
+
+        // 各種モードでの動作のためのオブジェクトを生やしたり生やさなかったりする
         switch (mode)
         {
             case AltaMode.EditorOnly:
                 // エディタのみで動作する場合のダミーヘッド、あんまり出番がなさそうだが一応。
-                var go = new GameObject().AddComponent<AltaDummyHead>();
+                new GameObject("AltaDummyHead").AddComponent<AltaDummyHead>();
+                break;
+            case AltaMode.ConnectFromDeviceToEditor:
+                // エディタ側のみ、回す。
+#if UNITY_EDITOR
+                var d2EHead = new GameObject("AltaLoaderForDeviceToEditorHead").AddComponent<AltaLoaderForDeviceToEditorHead>();
+                d2EHead.Setup(entry);
+#endif
+                break;
+            case AltaMode.ConnectFromDevice:
+                Debug.LogError("unsupported yet.");
+                break;
+            default:
+                Debug.LogError("unexpected mode:" + mode);
                 break;
         }
     }
@@ -113,18 +127,19 @@ public class AltaEntryPoint
         return;
 #endif
 
+        // エディタでない
 #if UNITY_IOS || UNITY_ANDROID
         initialize("test");
 
 
+        // TODO: Androidのみ、finish関数を実装済み
         {
 #if UNITY_ANDROID
-        // TODO: Androidのみ、finish関数を実装済み
         Finish = finish;
         var a = new GameObject().AddComponent<A>();
 #endif
-        }
 
+        }
 #endif
     }
 
@@ -153,19 +168,16 @@ public class AltaEntryPoint
                 return;
         }
 
-        Debug.Log("サーバを建立");
-
         // サーバを立てる
         server = new WebuSocketServer(
             1129,
             newConnection =>
             {
                 // 一つ目の通信をチェック、適合しなかったら弾かないといけない。
-                // TODO: ここを頑丈にしないといけない。後勝ちにしよう
+                // TODO: ここを頑丈にしないといけない。適度に後勝ちにする？
                 if (true)
                 {
-                    Debug.Log("WebuSocketServer connection received. 接続確立でOnConnectedが着火した後に問題が出てる感じか。");
-                    remoteSocket = newConnection;// TODO: 適当に上書きしてる、後勝ちにしないなどの工夫が必要。最悪上積みをオールデリートする必要がある。
+                    remoteSocket = newConnection;
                     remoteSocket.OnMessage = segments =>
                     {
                         while (0 < segments.Count)
@@ -174,13 +186,9 @@ public class AltaEntryPoint
                             var bytes = new byte[data.Count];
                             Buffer.BlockCopy(data.Array, data.Offset, bytes, 0, data.Count);
 
-                            Debug.Log("body received:" + string.Join(", ", bytes));
                             OnReceived(bytes);
                         }
                     };
-
-                    // 適当に4byte送り出す
-                    remoteSocket.Send(new byte[] { 0, 1, 2, 3 });
                 };
             }
         );
@@ -198,11 +206,14 @@ public class AltaEntryPoint
         onReceived(data);
     }
 
+
+    // TODO: セットアップ用の関数、そのうちなんか綺麗な粒度にしよう。まだふわふわ。
     public static void SetOnReceived(Action<byte[]> onReceived)
     {
         entry.onReceived = onReceived;
     }
 
+    // TODO: 送信、この粒度で扱うことはない。
     public static void Send(byte[] data)
     {
         entry.remoteSocket.Send(data);

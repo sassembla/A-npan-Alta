@@ -152,7 +152,7 @@ namespace WebuSocketCore.Server
 
             if (args.BytesTransferred == 0)
             {
-                Debug.LogError("failed to receive. args.BytesTransferred = 0." + " args.SocketError:" + args.SocketError);
+                // Debug.LogError("failed to receive. args.BytesTransferred = 0." + " args.SocketError:" + args.SocketError);
                 // if (OnError != null)
                 // {
                 //     var error = new Exception("failed to receive. args.BytesTransferred = 0." + " args.SocketError:" + args.SocketError);
@@ -790,7 +790,6 @@ accept-encoding: deflate";
         {
             try
             {
-                Debug.Log("StartReading してる OnConnected:" + OnConnected);
                 var connection = new ClientConnection(Guid.NewGuid().ToString(), 10240, socket, OnConnected);
             }
             catch (Exception e)

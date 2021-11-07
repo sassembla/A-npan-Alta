@@ -7,51 +7,70 @@ public partial class AltaEntryPoint
     // TODO: ユーザーランドが持つ変化域を保持するところ、ユーザーランド側に持たせたいがとりあえずこちらに。インターフェースとかで露出させられると良い。
     private State currentState;
 
-    public IEnumerator Setup()
+    public IEnumerator Setup(AltaEntryPoint entryPoint)
     {
+        var justConnected = false;
+        /*
+            ここでこの粒度でやるべきなのは、セットアップ = 接続待ち処理の開始で、
+                ・接続が来たらstateを返すようなことを自律的に予約する
+                ・切断したら検知
+                    ・独自UIを出す or native側を破棄してリセット
+                ・セキュアさはとりあえず置いておく
+        */
+
         // レシーバのセット
         // TODO: disconnectedとかも検知できたほうがいい。とりあえずの代物で、実際にはSetできる要素を受け付けることはない。
-        AltaEntryPoint.SetOnReceived(
-            bytes =>
-                {
-                    Debug.Log("headからのデータを受け取った:" + bytes.Length + " bytes");
-
-                }
-            );
-
-        Debug.Log("起動したので、遷移を管理する。最初はリストビュー");
-
-
-    // ここから、最初はサーバが立ち上がってないタイミングがありえるので、それをどうするかって話が始まるのか。送信に失敗したら云々が必要か。
-    // TODO: 現在は適当なリトライ機構が入ってる、とりあえずこれでclientが来たら何かできるようになった。
-    retry:
-        try
+        entryPoint.onReceived = bytes =>
         {
-            Go(State.ListView);
-            Debug.Log("送り出せたのでconnected");
-            yield break;
-        }
-        catch (Exception e)
+            Debug.Log("headからのデータを受け取った:" + bytes.Length + " bytes");
+        };
+        entryPoint.onConnected = () =>
         {
-            Debug.Log("e:" + e);
+            Debug.Log("接続がきた");
+            justConnected = true;
+        };
+
+
+        // ここから、最初はサーバが立ち上がってないタイミングがありえるので、それをどうするかって話が始まるのか。送信に失敗したら云々が必要か。
+        // TODO: 現在は適当なリトライ機構が入ってる、とりあえずこれでclientが来たら何かできるようになった。
+
+        // 一応作ってる接続後の空転ぶロック
+        while (true)
+        {
+            if (justConnected)
+            {
+                justConnected = false;
+                break;
+            }
+
+            yield return null;
         }
 
-        // 1秒待ち
-        yield return new WaitForSeconds(1);
+    reconnect:
 
-        goto retry;
-    }
+        Debug.Log("view側が起動したので、遷移を管理する。最初はリストビュー");
 
-    // 画面遷移を切り替える
-    private void Go(State state)
-    {
+
+        // 接続がきたのでレスポンスとして初期遷移を返す
+        var state = State.ListView;
         currentState = state;
 
-        Debug.Log("画面の要素を起動する state:" + state);
         /*
             ここで、stateに応じたビューを用意したいところで、native側に共有部分のデータを送り出すだけ。
             stateを送り出す必要があり、gRPCの生成系とかを使いたいところだが、さて、、まあとりあえず試験Appだから適当に送る。
         */
         AltaEntryPoint.Send(new byte[] { (byte)state });
+
+        while (true)
+        {
+            // 二度目以降の接続がきた
+            if (justConnected)
+            {
+                justConnected = false;
+                goto reconnect;
+            }
+            yield return null;
+        }
+
     }
 }

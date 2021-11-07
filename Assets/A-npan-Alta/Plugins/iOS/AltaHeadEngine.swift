@@ -84,10 +84,18 @@ class AltaHeadConnection_iOS_ws : NSObject, URLSessionWebSocketDelegate {
                  NewItemView
              }
          */
-        print("ここを自動生成で握れるとすごくよい、index-sceneマッピング。まあ握れると思うけど。")
+        print("ここを自動生成で握れるとすごくよい、index-sceneマッピング。まあ握れると思うけど。", index)
         
         switch index {
         case 1:
+            DispatchQueue.main.async {
+                let window = UIApplication.shared.keyWindow!
+                let currentBundle = Bundle(for: type(of: self))
+                let storyboard = UIStoryboard(name: "main", bundle: currentBundle)
+                let controller = storyboard.instantiateInitialViewController()!
+                controller.modalPresentationStyle = .fullScreen
+                window.rootViewController?.present(controller, animated: false, completion: nil)
+            }
             
             break
         default:

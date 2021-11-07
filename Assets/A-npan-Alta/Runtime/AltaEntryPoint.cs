@@ -154,7 +154,7 @@ public partial class AltaEntryPoint
         switch (mode)
         {
             case AltaMode.ConnectFromDevice:
-                // pass. 本番モード。開発中であればwsを使う。
+                // pass. 本番モード。開発中であればwsを使う。
                 break;
             case AltaMode.ConnectFromDeviceToEditor:
 #if UNITY_EDITOR
@@ -175,7 +175,7 @@ public partial class AltaEntryPoint
             {
                 // 一つ目の通信をチェック、適合しなかったら弾かないといけない。
                 // TODO: ここを頑丈にしないといけない。適度に後勝ちにする？
-                if (true)
+                if (remoteSocket == null)
                 {
                     remoteSocket = newConnection;
                     remoteSocket.OnMessage = segments =>
@@ -189,16 +189,29 @@ public partial class AltaEntryPoint
                             OnReceived(bytes);
                         }
                     };
-                };
+                    onConnected();
+                }
+                else
+                {
+                    Debug.LogError("remoteSocketにすでに何かあるが更新");
+                    remoteSocket = newConnection;
+                    remoteSocket.OnMessage = segments =>
+                    {
+                        while (0 < segments.Count)
+                        {
+                            var data = segments.Dequeue();
+                            var bytes = new byte[data.Count];
+                            Buffer.BlockCopy(data.Array, data.Offset, bytes, 0, data.Count);
+
+                            OnReceived(bytes);
+                        }
+                    };
+                    onConnected();
+                }
             }
         );
-
-        // TODO: 利用することがあれば。
-        Action serverStop = () =>
-        {
-            server?.Dispose();
-        };
     }
+    private Action onConnected = () => { };
 
     private Action<byte[]> onReceived = bytes => { };
     private void OnReceived(byte[] data)
@@ -207,13 +220,7 @@ public partial class AltaEntryPoint
     }
 
 
-    // TODO: セットアップ用の関数、そのうちなんか綺麗な粒度にしよう。まだふわふわ。
-    public static void SetOnReceived(Action<byte[]> onReceived)
-    {
-        entry.onReceived = onReceived;
-    }
-
-    // TODO: 送信、この粒度で扱うことはない。
+    // TODO: 送信、この粒度で扱うことはない。 インターナルな代物
     public static void Send(byte[] data)
     {
         entry.remoteSocket.Send(data);

@@ -10,5 +10,4 @@ iOS/*
 iOS-device/*
 android.apk
 android/*
-iOS-simulator/*
 obj/Debug/.NETFramework,Version=v4.7.1.AssemblyAttributes.cs

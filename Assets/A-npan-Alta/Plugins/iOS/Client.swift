@@ -10,35 +10,38 @@ import Foundation
 import Network
 
 public class Client {
-//    var initialViewCont:UIViewController
-    init() {
-        // TODO: ここで、storyboardコントロール用のAPI、画面遷移を伝える機能、などの開発、調整を行う。
+    init() {}
+    
+    // 起動時の画面を構築
+    // TOOD: このへんのインターフェースを整える必要がある
+    // storyboard名とかを開けるインターフェースを考えて、その骨組みも用意する必要がある。
+    func open(index: Int) {
+        /*
+             enum State
+             {
+                 None,
+                 ListView,
+                 TimeView,
+                 NewItemView
+             }
+         */
+        var storyboardName = ""
+        switch (index) {
+        case 1:
+            storyboardName = "ListView"
+        case 2:
+            storyboardName = "TimeView"
+        case 3:
+            storyboardName = "NewItemView"
+        default:
+            break
+        }
         
-//        let window = UIApplication.shared.keyWindow!
-//
-//        // このクラスが属するバンドル（つまりUnityFramework.frameworkのバンドル）のBundleオブジェクトを取得
-//        let currentBundle = Bundle(for: type(of: self))
-////        print("bundle:\(currentBundle)")
-//
-//        let storyboard = UIStoryboard(name: "TableSample", bundle: currentBundle)
-//        let controller = storyboard.instantiateInitialViewController()!
-//
-//        // これだとうまく描画されない
-////        window.addSubview(controller.view)
-//
-//        controller.modalPresentationStyle = .fullScreen
-//
-////
-//        initialViewCont = window.rootViewController!
-//        print("initialViewCont", initialViewCont)
-//
-//        window.rootViewController?.present(controller, animated: false, completion: {
-//            let seconds = 4.0
-//            DispatchQueue.main.asyncAfter(deadline: .now() + seconds) {
-//                print("initialViewCont2", self.initialViewCont)
-//                window.addSubview( self.initialViewCont.view)
-//                window.rootViewController =  self.initialViewCont
-//            }
-//        })
+        let window = UIApplication.shared.windows.filter {$0.isKeyWindow}.first!
+        let currentBundle = Bundle(for: type(of: self))
+        let storyboard = UIStoryboard(name: storyboardName, bundle: currentBundle)
+        let controller = storyboard.instantiateInitialViewController()!
+        controller.modalPresentationStyle = .fullScreen
+        window.rootViewController?.present(controller, animated: false, completion: nil)
     }
-}
+ }

@@ -4,20 +4,24 @@ import Network
 @objc public class AltaHeadEngine : NSObject {
     
     @objc public static func initialize(_ code: String) {
-        // 中継インスタンス作成
-        let head3 = AltaHeadConnection_iOS_ws()
-        head3.connect()
         
         // ビュー用のインスタンス作成
         let client = Client()
+        
+        // 中継インスタンス作成
+        let head3 = AltaHeadConnection_iOS_ws()
+        head3.connect(client: client)
     }
 }
 
 class AltaHeadConnection_iOS_ws : NSObject, URLSessionWebSocketDelegate {
     private var webSocketTask: URLSessionWebSocketTask?
+    private var _client: Client?
     
     // initで扱いたいけどダメなもん？
-    func connect() {
+    func connect(client: Client) {
+        _client = client
+        
         // TODO: URLが固定だけど、とりあえずのしろもの
         let url = URL(string: "ws://127.0.0.1:1129")!
         
@@ -37,16 +41,14 @@ class AltaHeadConnection_iOS_ws : NSObject, URLSessionWebSocketDelegate {
     }
 
     private func onReceive(incoming: Result<URLSessionWebSocketTask.Message, Error>) {
-//        print("receiveしてる", incoming)
-        
         switch(incoming){
         case.success(let message):
-            print("message:", message)
             switch message {
             case .data(let bytes):
                 // 特定のシーンに該当するstoryboardを呼び出す
                 // この時点ではUInt8になってる
-                onGo(index: bytes[0])
+                let index = Int(bytes[0])
+                onGo(index: index)
                 break;
             case .string(let str):
                 print("unexpected, server sent string:", str)
@@ -74,27 +76,11 @@ class AltaHeadConnection_iOS_ws : NSObject, URLSessionWebSocketDelegate {
         webSocketTask?.receive(completionHandler: onReceive)
     }
     
-    private func onGo(index:UInt8) {
-        /*
-             enum State
-             {
-                 None,
-                 ListView,
-                 TimeView,
-                 NewItemView
-             }
-         */
-        print("ここを自動生成で握れるとすごくよい、index-sceneマッピング。まあ握れると思うけど。", index)
-        
+    private func onGo(index:Int) {
         switch index {
-        case 1:
+        case 1,2,3:
             DispatchQueue.main.async {
-                let window = UIApplication.shared.keyWindow!
-                let currentBundle = Bundle(for: type(of: self))
-                let storyboard = UIStoryboard(name: "main", bundle: currentBundle)
-                let controller = storyboard.instantiateInitialViewController()!
-                controller.modalPresentationStyle = .fullScreen
-                window.rootViewController?.present(controller, animated: false, completion: nil)
+                self._client?.open(index: index)
             }
             
             break

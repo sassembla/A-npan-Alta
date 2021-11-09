@@ -15,6 +15,7 @@ class ListViewController: UIViewController, UITableViewDelegate, UITableViewData
     
     private var contents: [UIListContentConfiguration] = [
         {
+            //
             var content: UIListContentConfiguration = .valueCell()
             content.textProperties.font = .systemFont(ofSize: 20, weight: .heavy)
             content.textProperties.color = .systemGreen
@@ -36,8 +37,8 @@ class ListViewController: UIViewController, UITableViewDelegate, UITableViewData
         }()
     ]
     
-    // 適当なデータを用意
-    private var data:[(product: String, description: String)] = [
+    // 適当なデータを用意、これの初期化をUnity側にやらせればいい。
+    private var data:[(title: String, description: String)] = [
         ("AAA", "aaa aaaaa aaaa"),
         ("BBB", "bbb bbbbb bbbb"),
         ("CCC", "ccc ccccc cccc"),
@@ -52,10 +53,12 @@ class ListViewController: UIViewController, UITableViewDelegate, UITableViewData
     override func viewDidLoad() {
         super.viewDidLoad()
         print("ListViewController view did load.")
+        
+        // ここでロード待ちを行う感じになりそう。
     }
     
     @IBAction func onTapped(_ sender: Any) {
-        print("onTapped")
+        print("onTapped", sender)
     }
     
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
@@ -68,9 +71,11 @@ class ListViewController: UIViewController, UITableViewDelegate, UITableViewData
         // Use default settings
         var content = cell.defaultContentConfiguration()
 
-
-        content.text = data[indexPath.row].product
+        // パラメータ類のセット、ここをasyncにできるんだろうか。 既存実装見てみよ
+        content.text = data[indexPath.row].title
         content.secondaryText = data[indexPath.row].description
+        
+        // 今日のdone
         if (indexPath.row % 2 == 0) {
             content.image = UIImage(systemName: "checkmark.square")
             
@@ -81,14 +86,26 @@ class ListViewController: UIViewController, UITableViewDelegate, UITableViewData
             content.image = UIImage(systemName: "square")
         }
 
-        // Set content
+        // contentの更新
         cell.contentConfiguration = content
         
         return cell
     }
     
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-        print("tapされた", indexPath)
+        print("tapされた", indexPath.row)
         tableView.deselectRow(at: indexPath, animated: true)
+        
+        // ここからUnity側にリクエストを投げる。 protobufでやろう。定義どうすっかな〜〜、汎用oneofみたいなのが作れれば。データ定義もUnity側からprotoで流れてくるのが理想だなー。partialみたいなので。
+        
+        var info = Info()
+        info.id = Int64(indexPath.row)
+        info.data = "something"
+        do {
+            let binaryData: Data = try info.serializedData()
+            AltaHeadEngine.send(binaryData)
+        } catch {
+            
+        }
     }
 }

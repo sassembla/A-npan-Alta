@@ -12,8 +12,6 @@ namespace WebuSocketCore
     {
         EMPTY,
         CONNECTING,
-        TLS_HANDSHAKING,
-        TLS_HANDSHAKE_DONE,
         WS_HANDSHAKING,
         OPENED,
         CLOSING,
@@ -33,8 +31,6 @@ namespace WebuSocketCore
         UNKNOWN_ERROR,
         DOMAIN_UNRESOLVED,
         CONNECTION_FAILED,
-        TLS_HANDSHAKE_FAILED,
-        TLS_ERROR,
         WS_HANDSHAKE_FAILED,
         WS_HANDSHAKE_KEY_UNMATCHED,
         SEND_FAILED,
@@ -133,10 +129,6 @@ namespace WebuSocketCore
 			temporary parameters.
 		*/
         private readonly string base64Key;
-
-        private readonly bool isWss;
-        private readonly Encryption.WebuSocketTlsClientProtocol tlsClientProtocol;
-
         private readonly byte[] websocketHandshakeRequestBytes;
 
         public WebuSocket(
@@ -191,13 +183,6 @@ namespace WebuSocketCore
             // check if dns or ip.
             var isDns = (uri.HostNameType == UriHostNameType.Dns);
 
-            // ready tls machine for wss.
-            if (scheme == "wss")
-            {
-                this.isWss = true;
-                this.tlsClientProtocol = new Encryption.WebuSocketTlsClientProtocol();
-                tlsClientProtocol.Connect(new Encryption.WebuSocketTlsClient(TLSHandshakeDone, TLSHandleError));
-            }
 
             var requestHeaderParams = new Dictionary<string, string> {
                 {"Host", isDns ? uri.DnsSafeHost : uri.Authority},
@@ -298,38 +283,6 @@ namespace WebuSocketCore
             StartConnectAsync();
         }
 
-        private void TLSHandshakeDone()
-        {
-            switch (socketToken.socketState)
-            {
-                case SocketState.TLS_HANDSHAKING:
-                    {
-                        socketToken.socketState = SocketState.TLS_HANDSHAKE_DONE;
-                        break;
-                    }
-                default:
-                    {
-                        if (OnError != null)
-                        {
-                            var error = new Exception("tls handshake failed in unexpected state.");
-                            OnError(WebuSocketErrorEnum.TLS_HANDSHAKE_FAILED, error);
-                        }
-                        Disconnect();
-                        break;
-                    }
-            }
-        }
-
-        private void TLSHandleError(Exception e, string errorMessage)
-        {
-            if (OnError != null)
-            {
-                if (e == null) e = new Exception("tls error:" + errorMessage);
-                OnError(WebuSocketErrorEnum.TLS_ERROR, e);
-            }
-            Disconnect();
-        }
-
         private void StartConnectAsync()
         {
             var clientSocket = new Socket(endPoint.AddressFamily, SocketType.Stream, ProtocolType.Tcp);
@@ -377,12 +330,6 @@ namespace WebuSocketCore
                             return;
                         }
 
-                        if (isWss)
-                        {
-                            SendTLSHandshake(token);
-                            return;
-                        }
-
                         SendWSHandshake(token);
                         return;
                     }
@@ -400,39 +347,12 @@ namespace WebuSocketCore
             }
         }
 
-        private void SendTLSHandshake(SocketToken token)
-        {
-            token.socketState = SocketState.TLS_HANDSHAKING;
-
-            // ready receive.
-            ReadyReceivingNewData(token);
-
-            // first, send clientHello to server.
-            // get ClientHello byte data from tlsClientProtocol instance and send it to server.
-            var buffer = new byte[tlsClientProtocol.GetAvailableOutputBytes()];
-            tlsClientProtocol.ReadOutput(buffer, 0, buffer.Length);
-
-            token.sendArgs.SetBuffer(buffer, 0, buffer.Length);
-            if (!token.socket.SendAsync(token.sendArgs)) OnSend(token.socket, token.sendArgs);
-        }
-
         private void SendWSHandshake(SocketToken token)
         {
             token.socketState = SocketState.WS_HANDSHAKING;
 
             ReadyReceivingNewData(token);
 
-            if (isWss)
-            {
-                tlsClientProtocol.OfferOutput(websocketHandshakeRequestBytes, 0, websocketHandshakeRequestBytes.Length);
-
-                var count = tlsClientProtocol.GetAvailableOutputBytes();
-                var buffer = new byte[count];
-                tlsClientProtocol.ReadOutput(buffer, 0, buffer.Length);
-
-                token.sendArgs.SetBuffer(buffer, 0, buffer.Length);
-            }
-            else
             {
                 token.sendArgs.SetBuffer(websocketHandshakeRequestBytes, 0, websocketHandshakeRequestBytes.Length);
             }
@@ -555,89 +475,25 @@ namespace WebuSocketCore
 
             switch (token.socketState)
             {
-                case SocketState.TLS_HANDSHAKING:
-                    {
-                        // set received data to tlsClientProtocol by "OfferInput" method.
-                        // tls handshake phase will progress.
-                        tlsClientProtocol.OfferInputBytes(args.Buffer, args.BytesTransferred);
-
-                        // state is changed to TLS_HANDSHAKE_DONE if tls handshake is done inside tlsClientProtocol.
-                        if (token.socketState == SocketState.TLS_HANDSHAKE_DONE)
-                        {
-                            SendWSHandshake(token);
-                            return;
-                        }
-
-                        /*
-                            continue handshaking.
-                        */
-
-                        var outputBufferSize = tlsClientProtocol.GetAvailableOutputBytes();
-
-                        if (outputBufferSize == 0)
-                        {
-                            // ready receive next data.
-                            ReadyReceivingNewData(token);
-                            return;
-                        }
-
-                        // next tls handshake data is ready inside tlsClientProtocol.
-                        var buffer = new byte[outputBufferSize];
-                        tlsClientProtocol.ReadOutput(buffer, 0, buffer.Length);
-
-                        // ready receive next data.
-                        ReadyReceivingNewData(token);
-
-                        // send.
-                        token.sendArgs.SetBuffer(buffer, 0, buffer.Length);
-                        if (!token.socket.SendAsync(token.sendArgs)) OnSend(token.socket, token.sendArgs);
-                        return;
-                    }
                 case SocketState.WS_HANDSHAKING:
                     {
                         var receivedData = new byte[args.BytesTransferred];
                         Buffer.BlockCopy(args.Buffer, 0, receivedData, 0, receivedData.Length);
 
-                        if (isWss)
+                        var index = 0;
+                        var length = args.BytesTransferred;
+                        if (webSocketHandshakeResult == null)
                         {
-                            tlsClientProtocol.OfferInput(receivedData);
-                            if (0 < tlsClientProtocol.GetAvailableInputBytes())
-                            {
-                                var index = 0;
-                                var length = tlsClientProtocol.GetAvailableInputBytes();
-                                if (webSocketHandshakeResult == null)
-                                {
-                                    webSocketHandshakeResult = new byte[length];
-                                }
-                                else
-                                {
-                                    index = webSocketHandshakeResult.Length;
-                                    // already hold some bytes, and should expand for holding more decrypted data.
-                                    Array.Resize(ref webSocketHandshakeResult, webSocketHandshakeResult.Length + length);
-                                }
-
-                                tlsClientProtocol.ReadInput(webSocketHandshakeResult, index, length);
-                            }
-
-                            // failed to get tls decrypted data from current receiving data.
-                            // continue receiving next data at the end of this case.
+                            webSocketHandshakeResult = new byte[args.BytesTransferred];
                         }
                         else
                         {
-                            var index = 0;
-                            var length = args.BytesTransferred;
-                            if (webSocketHandshakeResult == null)
-                            {
-                                webSocketHandshakeResult = new byte[args.BytesTransferred];
-                            }
-                            else
-                            {
-                                index = webSocketHandshakeResult.Length;
-                                // already hold some bytes, and should expand for holding more decrypted data.
-                                Array.Resize(ref webSocketHandshakeResult, webSocketHandshakeResult.Length + length);
-                            }
-                            Buffer.BlockCopy(args.Buffer, 0, webSocketHandshakeResult, index, length);
+                            index = webSocketHandshakeResult.Length;
+                            // already hold some bytes, and should expand for holding more decrypted data.
+                            Array.Resize(ref webSocketHandshakeResult, webSocketHandshakeResult.Length + length);
                         }
+                        Buffer.BlockCopy(args.Buffer, 0, webSocketHandshakeResult, index, length);
+
 
                         if (0 < webSocketHandshakeResult.Length)
                         {
@@ -716,46 +572,18 @@ namespace WebuSocketCore
                     }
                 case SocketState.OPENED:
                     {
-                        if (isWss)
+
+                        var additionalLen = args.BytesTransferred;
+
+                        if (wsBuffer.Length < wsBufIndex + additionalLen)
                         {
-                            // write input to tls buffer.
-                            tlsClientProtocol.OfferInputBytes(args.Buffer, args.BytesTransferred);
-
-                            if (0 < tlsClientProtocol.GetAvailableInputBytes())
-                            {
-                                var additionalLen = tlsClientProtocol.GetAvailableInputBytes();
-
-                                if (wsBuffer.Length < wsBufIndex + additionalLen)
-                                {
-                                    Array.Resize(ref wsBuffer, wsBufIndex + additionalLen);
-                                    // resizeイベント発生をどう出すかな〜〜
-                                }
-
-                                // transfer bytes from tls buffer to wsBuffer.
-                                tlsClientProtocol.ReadInput(wsBuffer, wsBufIndex, additionalLen);
-
-                                wsBufLength = wsBufLength + additionalLen;
-                            }
-                            else
-                            {
-                                // received incomlete tls bytes, continue.
-                                ReadyReceivingNewData(token);
-                                return;
-                            }
+                            Array.Resize(ref wsBuffer, wsBufIndex + additionalLen);
+                            // resizeイベント発生をどう出すかな〜〜
                         }
-                        else
-                        {
-                            var additionalLen = args.BytesTransferred;
 
-                            if (wsBuffer.Length < wsBufIndex + additionalLen)
-                            {
-                                Array.Resize(ref wsBuffer, wsBufIndex + additionalLen);
-                                // resizeイベント発生をどう出すかな〜〜
-                            }
+                        Buffer.BlockCopy(args.Buffer, 0, wsBuffer, wsBufIndex, additionalLen);
+                        wsBufLength = wsBufLength + additionalLen;
 
-                            Buffer.BlockCopy(args.Buffer, 0, wsBuffer, wsBufIndex, additionalLen);
-                            wsBufLength = wsBufLength + additionalLen;
-                        }
 
                         ReadBuffer(token);
                         return;
@@ -860,20 +688,7 @@ namespace WebuSocketCore
 
             var closeData = WebSocketByteGenerator.CloseData();
 
-            if (isWss)
-            {
-                tlsClientProtocol.OfferOutput(closeData, 0, closeData.Length);
-
-                var count = tlsClientProtocol.GetAvailableOutputBytes();
-                var buffer = new byte[count];
-                tlsClientProtocol.ReadOutput(buffer, 0, buffer.Length);
-
-                closeEventArgs.SetBuffer(buffer, 0, buffer.Length);
-            }
-            else
-            {
-                closeEventArgs.SetBuffer(closeData, 0, closeData.Length);
-            }
+            closeEventArgs.SetBuffer(closeData, 0, closeData.Length);
 
             closeEventArgs.Completed += new EventHandler<SocketAsyncEventArgs>(OnDisconnected);
 
@@ -1160,7 +975,6 @@ namespace WebuSocketCore
                 Exception error = null;
                 switch (socketToken.socketState)
                 {
-                    case SocketState.TLS_HANDSHAKING:
                     case SocketState.WS_HANDSHAKING:
                         {
                             ev = WebuSocketErrorEnum.CONNECTING;
@@ -1191,88 +1005,42 @@ namespace WebuSocketCore
             this._OnPonged = _onPonged;
             var pingBytes = WebSocketByteGenerator.Ping(data);
 
-            if (isWss)
+
+            try
             {
-                tlsClientProtocol.OfferOutput(pingBytes, 0, pingBytes.Length);
-
-                var buffer = new byte[tlsClientProtocol.GetAvailableOutputBytes()];
-                tlsClientProtocol.ReadOutput(buffer, 0, buffer.Length);
-
-                try
-                {
-                    socketToken.socket.BeginSend(
-                        buffer,
-                        0,
-                        buffer.Length,
-                        SocketFlags.None,
-                        result =>
-                        {
-                            var s = (Socket)result.AsyncState;
-                            var len = s.EndSend(result);
-                            if (0 < len)
-                            {
-                                // do nothing.
-                            }
-                            else
-                            {
-                                // send failed.
-                                if (OnError != null)
-                                {
-                                    var error = new Exception("send error:" + "ping failed by unknown reason.");
-                                    OnError(WebuSocketErrorEnum.PING_FAILED, error);
-                                }
-                            }
-                        },
-                        socketToken.socket
-                    );
-                }
-                catch (Exception e)
-                {
-                    if (OnError != null)
+                socketToken.socket.BeginSend(
+                    pingBytes,
+                    0,
+                    pingBytes.Length,
+                    SocketFlags.None,
+                    result =>
                     {
-                        OnError(WebuSocketErrorEnum.PING_FAILED, e);
-                    }
-                    Disconnect();
-                }
+                        var s = (Socket)result.AsyncState;
+                        var len = s.EndSend(result);
+                        if (0 < len)
+                        {
+                            // do nothing.
+                        }
+                        else
+                        {
+                            // send failed.
+                            if (OnError != null)
+                            {
+                                var error = new Exception("send error:" + "ping failed by unknown reason.");
+                                OnError(WebuSocketErrorEnum.PING_FAILED, error);
+                            }
+                        }
+                    },
+                    socketToken.socket
+                );
             }
-            else
+            catch (Exception e)
             {
-                try
+                if (OnError != null)
                 {
-                    socketToken.socket.BeginSend(
-                        pingBytes,
-                        0,
-                        pingBytes.Length,
-                        SocketFlags.None,
-                        result =>
-                        {
-                            var s = (Socket)result.AsyncState;
-                            var len = s.EndSend(result);
-                            if (0 < len)
-                            {
-                                // do nothing.
-                            }
-                            else
-                            {
-                                // send failed.
-                                if (OnError != null)
-                                {
-                                    var error = new Exception("send error:" + "ping failed by unknown reason.");
-                                    OnError(WebuSocketErrorEnum.PING_FAILED, error);
-                                }
-                            }
-                        },
-                        socketToken.socket
-                    );
+                    OnError(WebuSocketErrorEnum.PING_FAILED, e);
                 }
-                catch (Exception e)
-                {
-                    if (OnError != null)
-                    {
-                        OnError(WebuSocketErrorEnum.PING_FAILED, e);
-                    }
-                    Disconnect();
-                }
+                Disconnect();
             }
         }
 
@@ -1284,7 +1052,6 @@ namespace WebuSocketCore
                 Exception error = null;
                 switch (socketToken.socketState)
                 {
-                    case SocketState.TLS_HANDSHAKING:
                     case SocketState.WS_HANDSHAKING:
                         {
                             ev = WebuSocketErrorEnum.CONNECTING;
@@ -1315,89 +1082,43 @@ namespace WebuSocketCore
             //     Debug.Log("send i:" + payloadBytes[i]);
             // }
 
-            if (isWss)
+
+            try
             {
-                tlsClientProtocol.OfferOutput(payloadBytes, 0, payloadBytes.Length);
-
-                var buffer = new byte[tlsClientProtocol.GetAvailableOutputBytes()];
-                tlsClientProtocol.ReadOutput(buffer, 0, buffer.Length);
-
-                try
-                {
-                    socketToken.socket.BeginSend(
-                        buffer,
-                        0,
-                        buffer.Length,
-                        SocketFlags.None,
-                        result =>
-                        {
-                            var s = (Socket)result.AsyncState;
-                            var len = s.EndSend(result);
-                            if (0 < len)
-                            {
-                                // do nothing.
-                            }
-                            else
-                            {
-                                // send failed.
-                                if (OnError != null)
-                                {
-                                    var error = new Exception("send error:" + "send failed by unknown reason.");
-                                    OnError(WebuSocketErrorEnum.SEND_FAILED, error);
-                                }
-                            }
-                        },
-                        socketToken.socket
-                    );
-                }
-                catch (Exception e)
-                {
-                    if (OnError != null)
+                socketToken.socket.BeginSend(
+                    payloadBytes,
+                    0,
+                    payloadBytes.Length,
+                    SocketFlags.None,
+                    result =>
                     {
-                        OnError(WebuSocketErrorEnum.SEND_FAILED, e);
-                    }
-                    Disconnect();
-                }
+                        var s = (Socket)result.AsyncState;
+                        var len = s.EndSend(result);
+                        if (0 < len)
+                        {
+                            // do nothing.
+                        }
+                        else
+                        {
+                            // send failed.
+                            if (OnError != null)
+                            {
+                                var error = new Exception("send error:" + "send failed by unknown reason.");
+                                OnError(WebuSocketErrorEnum.SEND_FAILED, error);
+                            }
+                        }
+                    },
+                    socketToken.socket
+                );
             }
-            else
+            catch (Exception e)
             {
-                try
+                Debug.Log("送り出してる e:" + e);
+                if (OnError != null)
                 {
-                    socketToken.socket.BeginSend(
-                        payloadBytes,
-                        0,
-                        payloadBytes.Length,
-                        SocketFlags.None,
-                        result =>
-                        {
-                            var s = (Socket)result.AsyncState;
-                            var len = s.EndSend(result);
-                            if (0 < len)
-                            {
-                                // do nothing.
-                            }
-                            else
-                            {
-                                // send failed.
-                                if (OnError != null)
-                                {
-                                    var error = new Exception("send error:" + "send failed by unknown reason.");
-                                    OnError(WebuSocketErrorEnum.SEND_FAILED, error);
-                                }
-                            }
-                        },
-                        socketToken.socket
-                    );
+                    OnError(WebuSocketErrorEnum.SEND_FAILED, e);
                 }
-                catch (Exception e)
-                {
-                    Debug.Log("送り出してる e:" + e);
-                    if (OnError != null)
-                    {
-                        OnError(WebuSocketErrorEnum.SEND_FAILED, e);
-                    }
-                    Disconnect();
-                }
+                Disconnect();
             }
         }
 
@@ -1409,7 +1130,6 @@ namespace WebuSocketCore
                 Exception error = null;
                 switch (socketToken.socketState)
                 {
-                    case SocketState.TLS_HANDSHAKING:
                     case SocketState.WS_HANDSHAKING:
                         {
                             ev = WebuSocketErrorEnum.CONNECTING;
@@ -1437,88 +1157,41 @@ namespace WebuSocketCore
             var byteData = Encoding.UTF8.GetBytes(data);
             var payloadBytes = WebSocketByteGenerator.SendTextData(byteData);
 
-            if (isWss)
+            try
             {
-                tlsClientProtocol.OfferOutput(payloadBytes, 0, payloadBytes.Length);
-
-                var buffer = new byte[tlsClientProtocol.GetAvailableOutputBytes()];
-                tlsClientProtocol.ReadOutput(buffer, 0, buffer.Length);
-
-                try
-                {
-                    socketToken.socket.BeginSend(
-                        buffer,
-                        0,
-                        buffer.Length,
-                        SocketFlags.None,
-                        result =>
-                        {
-                            var s = (Socket)result.AsyncState;
-                            var len = s.EndSend(result);
-                            if (0 < len)
-                            {
-                                // do nothing.
-                            }
-                            else
-                            {
-                                // send failed.
-                                if (OnError != null)
-                                {
-                                    var error = new Exception("send error:" + "send failed by unknown reason.");
-                                    OnError(WebuSocketErrorEnum.SEND_FAILED, error);
-                                }
-                            }
-                        },
-                        socketToken.socket
-                    );
-                }
-                catch (Exception e)
-                {
-                    if (OnError != null)
+                socketToken.socket.BeginSend(
+                    payloadBytes,
+                    0,
+                    payloadBytes.Length,
+                    SocketFlags.None,
+                    result =>
                     {
-                        OnError(WebuSocketErrorEnum.SEND_FAILED, e);
-                    }
-                    Disconnect();
-                }
+                        var s = (Socket)result.AsyncState;
+                        var len = s.EndSend(result);
+                        if (0 < len)
+                        {
+                            // do nothing.
+                        }
+                        else
+                        {
+                            // send failed.
+                            if (OnError != null)
+                            {
+                                var error = new Exception("send error:" + "send failed by unknown reason.");
+                                OnError(WebuSocketErrorEnum.SEND_FAILED, error);
+                            }
+                        }
+                    },
+                    socketToken.socket
+                );
             }
-            else
+            catch (Exception e)
             {
-                try
+                if (OnError != null)
                 {
-                    socketToken.socket.BeginSend(
-                        payloadBytes,
-                        0,
-                        payloadBytes.Length,
-                        SocketFlags.None,
-                        result =>
-                        {
-                            var s = (Socket)result.AsyncState;
-                            var len = s.EndSend(result);
-                            if (0 < len)
-                            {
-                                // do nothing.
-                            }
-                            else
-                            {
-                                // send failed.
-                                if (OnError != null)
-                                {
-                                    var error = new Exception("send error:" + "send failed by unknown reason.");
-                                    OnError(WebuSocketErrorEnum.SEND_FAILED, error);
-                                }
-                            }
-                        },
-                        socketToken.socket
-                    );
+                    OnError(WebuSocketErrorEnum.SEND_FAILED, e);
                 }
-                catch (Exception e)
-                {
-                    if (OnError != null)
-                    {
-                        OnError(WebuSocketErrorEnum.SEND_FAILED, e);
-                    }
-                    Disconnect();
-                }
+                Disconnect();
             }
         }
 
@@ -1725,88 +1398,42 @@ namespace WebuSocketCore
         {
             var pongBytes = WebSocketByteGenerator.Pong(data);
 
-            if (isWss)
+
+            try
             {
-                tlsClientProtocol.OfferOutput(pongBytes, 0, pongBytes.Length);
-
-                var buffer = new byte[tlsClientProtocol.GetAvailableOutputBytes()];
-                tlsClientProtocol.ReadOutput(buffer, 0, buffer.Length);
-
-                try
-                {
-                    socketToken.socket.BeginSend(
-                        buffer,
-                        0,
-                        buffer.Length,
-                        SocketFlags.None,
-                        result =>
-                        {
-                            var s = (Socket)result.AsyncState;
-                            var len = s.EndSend(result);
-                            if (0 < len)
-                            {
-                                // do nothing.
-                            }
-                            else
-                            {
-                                // send failed.
-                                if (OnError != null)
-                                {
-                                    var error = new Exception("send error:" + "pong failed by unknown reason.");
-                                    OnError(WebuSocketErrorEnum.PONG_FAILED, error);
-                                }
-                            }
-                        },
-                        socketToken.socket
-                    );
-                }
-                catch (Exception e)
-                {
-                    if (OnError != null)
+                socketToken.socket.BeginSend(
+                    pongBytes,
+                    0,
+                    pongBytes.Length,
+                    SocketFlags.None,
+                    result =>
                     {
-                        OnError(WebuSocketErrorEnum.PONG_FAILED, e);
-                    }
-                    Disconnect();
-                }
+                        var s = (Socket)result.AsyncState;
+                        var len = s.EndSend(result);
+                        if (0 < len)
+                        {
+                            // do nothing.
+                        }
+                        else
+                        {
+                            // send failed.
+                            if (OnError != null)
+                            {
+                                var error = new Exception("send error:" + "pong failed by unknown reason.");
+                                OnError(WebuSocketErrorEnum.PONG_FAILED, error);
+                            }
+                        }
+                    },
+                    socketToken.socket
+                );
             }
-            else
+            catch (Exception e)
             {
-                try
+                if (OnError != null)
                 {
-                    socketToken.socket.BeginSend(
-                        pongBytes,
-                        0,
-                        pongBytes.Length,
-                        SocketFlags.None,
-                        result =>
-                        {
-                            var s = (Socket)result.AsyncState;
-                            var len = s.EndSend(result);
-                            if (0 < len)
-                            {
-                                // do nothing.
-                            }
-                            else
-                            {
-                                // send failed.
-                                if (OnError != null)
-                                {
-                                    var error = new Exception("send error:" + "pong failed by unknown reason.");
-                                    OnError(WebuSocketErrorEnum.PONG_FAILED, error);
-                                }
-                            }
-                        },
-                        socketToken.socket
-                    );
+                    OnError(WebuSocketErrorEnum.PONG_FAILED, e);
                 }
-                catch (Exception e)
-                {
-                    if (OnError != null)
-                    {
-                        OnError(WebuSocketErrorEnum.PONG_FAILED, e);
-                    }
-                    Disconnect();
-                }
+                Disconnect();
             }
 
             if (OnPinged != null) OnPinged();

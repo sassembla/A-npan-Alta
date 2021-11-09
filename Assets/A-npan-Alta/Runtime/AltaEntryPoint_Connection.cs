@@ -23,6 +23,7 @@ public partial class AltaEntryPoint
         entryPoint.onReceived = bytes =>
         {
             Debug.Log("headからのデータを受け取った:" + bytes.Length + " bytes");
+            // TODO: ここで、receiveしたデータペイロードをなんとかする。そろそろ構造化しないとな
         };
         entryPoint.onConnected = () =>
         {

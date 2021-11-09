@@ -3,7 +3,7 @@
 	archiveVersion = 1;
 	classes = {
 	};
-	objectVersion = 46;
+	objectVersion = 52;
 	objects = {
 
 /* Begin PBXBuildFile section */
@@ -60,6 +60,9 @@
 		7FD14589AB143BBE3189B6AF /* mscorlib16.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 089149E88BBE6BD59E7459CD /* mscorlib16.cpp */; };
 		80751C9E2737AC0F0001056E /* ListView.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 80751C9D2737AC0F0001056E /* ListView.storyboard */; };
 		80751CA02737B6A30001056E /* ListViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 80751C9F2737B6A30001056E /* ListViewController.swift */; };
+		80751CAE273A5C590001056E /* SwiftProtobuf in Frameworks */ = {isa = PBXBuildFile; productRef = 80751CAD273A5C590001056E /* SwiftProtobuf */; };
+		80751CB0273A5C590001056E /* SwiftProtobufPluginLibrary in Frameworks */ = {isa = PBXBuildFile; productRef = 80751CAF273A5C590001056E /* SwiftProtobufPluginLibrary */; };
+		80751CB3273A5E250001056E /* A_npan_Alta.pb.swift in Sources */ = {isa = PBXBuildFile; fileRef = 80751CB2273A5E250001056E /* A_npan_Alta.pb.swift */; };
 		80C3471685EE8C6D5E11EEA2 /* Il2CppCodeRegistration.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 6981453A9E1871E484AFEAA4 /* Il2CppCodeRegistration.cpp */; };
 		85BF478096BBF549809FB5D9 /* Il2CppInvokerTable.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A89B4135BEE866BA2DDA755C /* Il2CppInvokerTable.cpp */; };
 		862C245020AEC7AC006FB4AD /* UnityWebRequest.mm in Sources */ = {isa = PBXBuildFile; fileRef = 862C244F20AEC7AC006FB4AD /* UnityWebRequest.mm */; };
@@ -322,6 +325,7 @@
 		7F36C11013C5C673007FBDD9 /* AVFoundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AVFoundation.framework; path = System/Library/Frameworks/AVFoundation.framework; sourceTree = SDKROOT; };
 		80751C9D2737AC0F0001056E /* ListView.storyboard */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; path = ListView.storyboard; sourceTree = "<group>"; };
 		80751C9F2737B6A30001056E /* ListViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ListViewController.swift; sourceTree = "<group>"; };
+		80751CB2273A5E250001056E /* A_npan_Alta.pb.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = A_npan_Alta.pb.swift; path = ../../pb/A_npan_Alta.pb.swift; sourceTree = "<group>"; };
 		82974CA4988CDA8642D1CD4F /* Mono.Security_CodeGen.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; name = Mono.Security_CodeGen.c; path = Classes/Native/Mono.Security_CodeGen.c; sourceTree = SOURCE_ROOT; };
 		830B5C100E5ED4C100C7819F /* UIKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = UIKit.framework; path = System/Library/Frameworks/UIKit.framework; sourceTree = SDKROOT; };
 		8358D1B70ED1CC3700E3A684 /* AudioToolbox.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AudioToolbox.framework; path = System/Library/Frameworks/AudioToolbox.framework; sourceTree = SDKROOT; };
@@ -499,6 +503,7 @@
 				9D690CD721BFD39D005026B1 /* CoreMedia.framework in Frameworks */,
 				9D690CD821BFD3A5005026B1 /* CoreMotion.framework in Frameworks */,
 				9D690CD921BFD3AC005026B1 /* CoreVideo.framework in Frameworks */,
+				80751CAE273A5C590001056E /* SwiftProtobuf in Frameworks */,
 				9D690CDA21BFD3B5005026B1 /* Foundation.framework in Frameworks */,
 				9D690CDB21BFD3BF005026B1 /* OpenAL.framework in Frameworks */,
 				9D690CDC21BFD3C7005026B1 /* OpenGLES.framework in Frameworks */,
@@ -509,6 +514,7 @@
 				407649FDA7CF0AE28D275B37 /* libiPhone-lib.dylib in Frameworks */,
 				55E24F0DB4D5B42AD6C82D2D /* libil2cpp.a in Frameworks */,
 				B6E042CF8E5B3974A4AF62D4 /* baselib.a in Frameworks */,
+				80751CB0273A5C590001056E /* SwiftProtobufPluginLibrary in Frameworks */,
 				DCB34FC094938CE21CE9C1A4 /* Metal.framework in Frameworks */,
 				E5DE4422A1FE32D1482479B3 /* GameController.framework in Frameworks */,
 			);
@@ -530,6 +536,7 @@
 		29B97314FDCFA39411CA2CEA /* CustomTemplate */ = {
 			isa = PBXGroup;
 			children = (
+				80751CB1273A5E080001056E /* protobuf */,
 				80751C9C2737AC050001056E /* Views */,
 				AA31BF961B55660D0013FB1B /* Data */,
 				56C56C9717D6015100616839 /* Images.xcassets */,
@@ -707,6 +714,14 @@
 				80751C9F2737B6A30001056E /* ListViewController.swift */,
 			);
 			path = Views;
+			sourceTree = "<group>";
+		};
+		80751CB1273A5E080001056E /* protobuf */ = {
+			isa = PBXGroup;
+			children = (
+				80751CB2273A5E250001056E /* A_npan_Alta.pb.swift */,
+			);
+			path = protobuf;
 			sourceTree = "<group>";
 		};
 		8A3EDDC51615B7C1001839E9 /* UI */ = {
@@ -951,6 +966,10 @@
 			dependencies = (
 			);
 			name = UnityFramework;
+			packageProductDependencies = (
+				80751CAD273A5C590001056E /* SwiftProtobuf */,
+				80751CAF273A5C590001056E /* SwiftProtobufPluginLibrary */,
+			);
 			productName = UnityFramework;
 			productReference = 9D25AB9D213FB47800354C27 /* UnityFramework.framework */;
 			productType = "com.apple.product-type.framework";
@@ -992,6 +1011,9 @@
 				en,
 			);
 			mainGroup = 29B97314FDCFA39411CA2CEA /* CustomTemplate */;
+			packageReferences = (
+				80751CAC273A5C590001056E /* XCRemoteSwiftPackageReference "swift-protobuf" */,
+			);
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
@@ -1190,6 +1212,7 @@
 				4E44477BA6404ABFB700560C /* mscorlib10.cpp in Sources */,
 				DCE04F04BCFF87B9027E0F65 /* mscorlib11.cpp in Sources */,
 				A6134FB8A53CF31D36BADACE /* mscorlib12.cpp in Sources */,
+				80751CB3273A5E250001056E /* A_npan_Alta.pb.swift in Sources */,
 				14E8492597FC572D9F61ECF2 /* mscorlib13.cpp in Sources */,
 				01604EB389695E6E2B36F10E /* mscorlib14.cpp in Sources */,
 				9BB0422B8956785EB798F7C8 /* mscorlib15.cpp in Sources */,
@@ -1239,6 +1262,7 @@
 		1D6058940D05DD3E006BFB54 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				ALLOW_TARGET_PLATFORM_SPECIALIZATION = YES;
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				ARCHS = x86_64;
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
@@ -1258,7 +1282,10 @@
 				INFOPLIST_FILE = Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 15.0;
 				LD_GENERATE_MAP_FILE = YES;
-				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
 				ONLY_ACTIVE_ARCH = YES;
 				OTHER_CFLAGS = (
 					"$(inherited)",
@@ -1273,8 +1300,9 @@
 				PROVISIONING_PROFILE = "$(PROVISIONING_PROFILE_APP)";
 				PROVISIONING_PROFILE_APP = "";
 				PROVISIONING_PROFILE_SPECIFIER = "$(PROVISIONING_PROFILE_SPECIFIER_APP)";
-				SDKROOT = iphonesimulator;
-				SUPPORTED_PLATFORMS = iphonesimulator;
+				SDKROOT = iphoneos;
+				SUPPORTED_PLATFORMS = "iphonesimulator iphoneos";
+				SUPPORTS_MACCATALYST = YES;
 				TARGETED_DEVICE_FAMILY = "1,2";
 				UNITY_RUNTIME_VERSION = 2020.1.17f1;
 				UNITY_SCRIPTING_BACKEND = il2cpp;
@@ -1284,6 +1312,7 @@
 		1D6058950D05DD3E006BFB54 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				ALLOW_TARGET_PLATFORM_SPECIALIZATION = YES;
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				ARCHS = x86_64;
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
@@ -1300,7 +1329,10 @@
 				INFOPLIST_FILE = Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 15.0;
 				LD_GENERATE_MAP_FILE = YES;
-				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
 				ONLY_ACTIVE_ARCH = NO;
 				OTHER_CFLAGS = (
 					"$(inherited)",
@@ -1315,8 +1347,9 @@
 				PROVISIONING_PROFILE = "$(PROVISIONING_PROFILE_APP)";
 				PROVISIONING_PROFILE_APP = "";
 				PROVISIONING_PROFILE_SPECIFIER = "$(PROVISIONING_PROFILE_SPECIFIER_APP)";
-				SDKROOT = iphonesimulator;
-				SUPPORTED_PLATFORMS = iphonesimulator;
+				SDKROOT = iphoneos;
+				SUPPORTED_PLATFORMS = "iphonesimulator iphoneos";
+				SUPPORTS_MACCATALYST = YES;
 				TARGETED_DEVICE_FAMILY = "1,2";
 				UNITY_RUNTIME_VERSION = 2020.1.17f1;
 				UNITY_SCRIPTING_BACKEND = il2cpp;
@@ -1359,8 +1392,8 @@
 				IPHONEOS_DEPLOYMENT_TARGET = 15.0;
 				LD_GENERATE_MAP_FILE = YES;
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				SDKROOT = iphonesimulator;
-				SUPPORTED_PLATFORMS = iphonesimulator;
+				SDKROOT = iphoneos;
+				SUPPORTED_PLATFORMS = "iphonesimulator iphoneos";
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
 				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/$(PRODUCT_NAME_APP).app/$(PRODUCT_NAME_APP)";
@@ -1414,8 +1447,8 @@
 				LD_GENERATE_MAP_FILE = YES;
 				ONLY_ACTIVE_ARCH = YES;
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				SDKROOT = iphonesimulator;
-				SUPPORTED_PLATFORMS = iphonesimulator;
+				SDKROOT = iphoneos;
+				SUPPORTED_PLATFORMS = "iphonesimulator iphoneos";
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
 				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/$(PRODUCT_NAME_APP).app/$(PRODUCT_NAME_APP)";
@@ -1440,14 +1473,15 @@
 				GCC_WARN_ABOUT_RETURN_TYPE = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				PRODUCT_NAME_APP = alta;
-				SDKROOT = iphonesimulator;
-				SUPPORTED_PLATFORMS = iphonesimulator;
+				SDKROOT = iphoneos;
+				SUPPORTED_PLATFORMS = "iphonesimulator iphoneos";
 			};
 			name = ReleaseForRunning;
 		};
 		56E860811D6757FF00A1AB2B /* ReleaseForRunning */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				ALLOW_TARGET_PLATFORM_SPECIALIZATION = YES;
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				ARCHS = x86_64;
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
@@ -1465,7 +1499,10 @@
 				INFOPLIST_FILE = Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 15.0;
 				LD_GENERATE_MAP_FILE = YES;
-				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
 				ONLY_ACTIVE_ARCH = YES;
 				OTHER_CFLAGS = (
 					"$(inherited)",
@@ -1480,8 +1517,9 @@
 				PROVISIONING_PROFILE = "$(PROVISIONING_PROFILE_APP)";
 				PROVISIONING_PROFILE_APP = "";
 				PROVISIONING_PROFILE_SPECIFIER = "$(PROVISIONING_PROFILE_SPECIFIER_APP)";
-				SDKROOT = iphonesimulator;
-				SUPPORTED_PLATFORMS = iphonesimulator;
+				SDKROOT = iphoneos;
+				SUPPORTED_PLATFORMS = "iphonesimulator iphoneos";
+				SUPPORTS_MACCATALYST = YES;
 				TARGETED_DEVICE_FAMILY = "1,2";
 				UNITY_RUNTIME_VERSION = 2020.1.17f1;
 				UNITY_SCRIPTING_BACKEND = il2cpp;
@@ -1524,8 +1562,8 @@
 				IPHONEOS_DEPLOYMENT_TARGET = 15.0;
 				LD_GENERATE_MAP_FILE = YES;
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				SDKROOT = iphonesimulator;
-				SUPPORTED_PLATFORMS = iphonesimulator;
+				SDKROOT = iphoneos;
+				SUPPORTED_PLATFORMS = "iphonesimulator iphoneos";
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
 				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/$(PRODUCT_NAME_APP).app/$(PRODUCT_NAME_APP)";
@@ -1551,14 +1589,15 @@
 				GCC_WARN_ABOUT_RETURN_TYPE = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				PRODUCT_NAME_APP = alta;
-				SDKROOT = iphonesimulator;
-				SUPPORTED_PLATFORMS = iphonesimulator;
+				SDKROOT = iphoneos;
+				SUPPORTED_PLATFORMS = "iphonesimulator iphoneos";
 			};
 			name = ReleaseForProfiling;
 		};
 		56E860841D67581C00A1AB2B /* ReleaseForProfiling */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				ALLOW_TARGET_PLATFORM_SPECIALIZATION = YES;
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				ARCHS = x86_64;
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
@@ -1575,7 +1614,10 @@
 				INFOPLIST_FILE = Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 15.0;
 				LD_GENERATE_MAP_FILE = YES;
-				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
 				ONLY_ACTIVE_ARCH = YES;
 				OTHER_CFLAGS = (
 					"$(inherited)",
@@ -1590,8 +1632,9 @@
 				PROVISIONING_PROFILE = "$(PROVISIONING_PROFILE_APP)";
 				PROVISIONING_PROFILE_APP = "";
 				PROVISIONING_PROFILE_SPECIFIER = "$(PROVISIONING_PROFILE_SPECIFIER_APP)";
-				SDKROOT = iphonesimulator;
-				SUPPORTED_PLATFORMS = iphonesimulator;
+				SDKROOT = iphoneos;
+				SUPPORTED_PLATFORMS = "iphonesimulator iphoneos";
+				SUPPORTS_MACCATALYST = YES;
 				TARGETED_DEVICE_FAMILY = "1,2";
 				UNITY_RUNTIME_VERSION = 2020.1.17f1;
 				UNITY_SCRIPTING_BACKEND = il2cpp;
@@ -1634,8 +1677,8 @@
 				IPHONEOS_DEPLOYMENT_TARGET = 15.0;
 				LD_GENERATE_MAP_FILE = YES;
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				SDKROOT = iphonesimulator;
-				SUPPORTED_PLATFORMS = iphonesimulator;
+				SDKROOT = iphoneos;
+				SUPPORTED_PLATFORMS = "iphonesimulator iphoneos";
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
 				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/$(PRODUCT_NAME_APP).app/$(PRODUCT_NAME_APP)";
@@ -1685,7 +1728,11 @@
 				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
 				IPHONEOS_DEPLOYMENT_TARGET = 15.0;
 				LD_GENERATE_MAP_FILE = YES;
-				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
 				LIBRARY_SEARCH_PATHS = (
 					"$(inherited)",
 					"$(PROJECT_DIR)/Libraries",
@@ -1714,10 +1761,10 @@
 				PRODUCT_BUNDLE_IDENTIFIER = com.unity3d.framework;
 				PRODUCT_NAME = "$(TARGET_NAME:c99extidentifier)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
-				SDKROOT = iphonesimulator;
+				SDKROOT = iphoneos;
 				SKIP_INSTALL = YES;
 				STRIP_STYLE = "non-global";
-				SUPPORTED_PLATFORMS = iphonesimulator;
+				SUPPORTED_PLATFORMS = "iphonesimulator iphoneos";
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
 				UNITY_RUNTIME_VERSION = 2020.1.17f1;
@@ -1765,7 +1812,11 @@
 				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
 				IPHONEOS_DEPLOYMENT_TARGET = 15.0;
 				LD_GENERATE_MAP_FILE = YES;
-				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
 				LIBRARY_SEARCH_PATHS = (
 					"$(inherited)",
 					"$(PROJECT_DIR)/Libraries",
@@ -1795,10 +1846,10 @@
 				PRODUCT_BUNDLE_IDENTIFIER = com.unity3d.framework;
 				PRODUCT_NAME = "$(TARGET_NAME:c99extidentifier)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
-				SDKROOT = iphonesimulator;
+				SDKROOT = iphoneos;
 				SKIP_INSTALL = YES;
 				STRIP_STYLE = "non-global";
-				SUPPORTED_PLATFORMS = iphonesimulator;
+				SUPPORTED_PLATFORMS = "iphonesimulator iphoneos";
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
 				UNITY_RUNTIME_VERSION = 2020.1.17f1;
@@ -1847,7 +1898,11 @@
 				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
 				IPHONEOS_DEPLOYMENT_TARGET = 15.0;
 				LD_GENERATE_MAP_FILE = YES;
-				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
 				LIBRARY_SEARCH_PATHS = (
 					"$(inherited)",
 					"$(PROJECT_DIR)/Libraries",
@@ -1877,10 +1932,10 @@
 				PRODUCT_BUNDLE_IDENTIFIER = com.unity3d.framework;
 				PRODUCT_NAME = "$(TARGET_NAME:c99extidentifier)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
-				SDKROOT = iphonesimulator;
+				SDKROOT = iphoneos;
 				SKIP_INSTALL = YES;
 				STRIP_STYLE = "non-global";
-				SUPPORTED_PLATFORMS = iphonesimulator;
+				SUPPORTED_PLATFORMS = "iphonesimulator iphoneos";
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
 				UNITY_RUNTIME_VERSION = 2020.1.17f1;
@@ -1930,7 +1985,11 @@
 				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
 				IPHONEOS_DEPLOYMENT_TARGET = 15.0;
 				LD_GENERATE_MAP_FILE = YES;
-				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
 				LIBRARY_SEARCH_PATHS = (
 					"$(inherited)",
 					"$(PROJECT_DIR)/Libraries",
@@ -1960,10 +2019,10 @@
 				PRODUCT_BUNDLE_IDENTIFIER = com.unity3d.framework;
 				PRODUCT_NAME = "$(TARGET_NAME:c99extidentifier)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
-				SDKROOT = iphonesimulator;
+				SDKROOT = iphoneos;
 				SKIP_INSTALL = YES;
 				STRIP_STYLE = "non-global";
-				SUPPORTED_PLATFORMS = iphonesimulator;
+				SUPPORTED_PLATFORMS = "iphonesimulator iphoneos";
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
 				UNITY_RUNTIME_VERSION = 2020.1.17f1;
@@ -1989,8 +2048,8 @@
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				ONLY_ACTIVE_ARCH = NO;
 				PRODUCT_NAME_APP = alta;
-				SDKROOT = iphonesimulator;
-				SUPPORTED_PLATFORMS = iphonesimulator;
+				SDKROOT = iphoneos;
+				SUPPORTED_PLATFORMS = "iphonesimulator iphoneos";
 			};
 			name = Debug;
 		};
@@ -2009,8 +2068,8 @@
 				GCC_WARN_ABOUT_RETURN_TYPE = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				PRODUCT_NAME_APP = alta;
-				SDKROOT = iphonesimulator;
-				SUPPORTED_PLATFORMS = iphonesimulator;
+				SDKROOT = iphoneos;
+				SUPPORTED_PLATFORMS = "iphonesimulator iphoneos";
 			};
 			name = Release;
 		};
@@ -2062,6 +2121,30 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		80751CAC273A5C590001056E /* XCRemoteSwiftPackageReference "swift-protobuf" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/apple/swift-protobuf.git";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 1.0.0;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		80751CAD273A5C590001056E /* SwiftProtobuf */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 80751CAC273A5C590001056E /* XCRemoteSwiftPackageReference "swift-protobuf" */;
+			productName = SwiftProtobuf;
+		};
+		80751CAF273A5C590001056E /* SwiftProtobufPluginLibrary */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 80751CAC273A5C590001056E /* XCRemoteSwiftPackageReference "swift-protobuf" */;
+			productName = SwiftProtobufPluginLibrary;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = 29B97313FDCFA39411CA2CEA /* Project object */;
 }

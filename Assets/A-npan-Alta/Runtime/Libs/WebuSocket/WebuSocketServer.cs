@@ -373,7 +373,6 @@ accept-encoding: deflate";
                 Exception error = null;
                 switch (socketToken.socketState)
                 {
-                    case SocketState.TLS_HANDSHAKING:
                     case SocketState.WS_HANDSHAKING:
                         {
                             ev = WebuSocketErrorEnum.CONNECTING;

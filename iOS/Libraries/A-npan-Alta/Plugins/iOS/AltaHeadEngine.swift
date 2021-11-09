@@ -2,15 +2,20 @@ import Foundation
 import Network
 
 @objc public class AltaHeadEngine : NSObject {
+    // 中継インスタンス作成
+    private static var head = AltaHeadConnection_iOS_ws()
     
     @objc public static func initialize(_ code: String) {
-        
+        // TODO: ガードが必要であればつける。 UI側から初期化する必要はない。
         // ビュー用のインスタンス作成
         let client = Client()
         
-        // 中継インスタンス作成
-        let head3 = AltaHeadConnection_iOS_ws()
-        head3.connect(client: client)
+        // clientを投入してUnityからのcallをproxyする。
+        head.connect(client: client)
+    }
+    
+    @objc public static func send(_ code: Data) {
+        head.send(code)
     }
 }
 
@@ -38,6 +43,18 @@ class AltaHeadConnection_iOS_ws : NSObject, URLSessionWebSocketDelegate {
     
     func disconnect() {
         webSocketTask?.cancel(with: .normalClosure, reason: nil)
+    }
+    
+    // TODO: そのうち隠蔽するsendコード
+    public func send(_ code:Data) {
+        webSocketTask?.send(URLSessionWebSocketTask.Message.data(code), completionHandler: {e in
+            guard let err = e else {
+                print("send succeeded.")
+                return
+            }
+
+            print("error:", err)
+        })
     }
 
     private func onReceive(incoming: Result<URLSessionWebSocketTask.Message, Error>) {

@@ -71,7 +71,15 @@ class ListViewController: UIViewController, UITableViewDelegate, UITableViewData
 
         content.text = data[indexPath.row].product
         content.secondaryText = data[indexPath.row].description
-        content.image = UIImage(systemName: "appletv")
+        if (indexPath.row % 2 == 0) {
+            content.image = UIImage(systemName: "checkmark.square")
+            
+//            TODO: グレーカラーに設定を変えたいが、効いてる節がない。まあとりあえず置いておく。
+//            let configuration = UIImage.SymbolConfiguration(hierarchicalColor: .systemRed)
+//            content.image?.applyingSymbolConfiguration(configuration)
+        } else {
+            content.image = UIImage(systemName: "square")
+        }
 
         // Set content
         cell.contentConfiguration = content

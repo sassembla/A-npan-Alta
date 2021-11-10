@@ -746,7 +746,10 @@ accept-encoding: deflate";
 
     public class WebuSocketServer : IDisposable
     {
+        private TcpListener tcpListener;
+
         private readonly Action<ClientConnection> OnConnected;
+
         public WebuSocketServer(
             int port,
             Action<ClientConnection> onConnected
@@ -761,7 +764,7 @@ accept-encoding: deflate";
             // tcpListenerを使い、tcpClientを受け付ける。が、最終的には内部のsocketを取り出して通信している。networkStreamがクソすぎる。
             try
             {
-                var tcpListener = TcpListener.Create(port);
+                tcpListener = TcpListener.Create(port);
                 tcpListener.Start();
                 AcceptNewClient(tcpListener);
             }
@@ -806,7 +809,7 @@ accept-encoding: deflate";
             {
                 if (disposing)
                 {
-                    // dispose managed state (managed objects).
+                    tcpListener.Server.Close();
                 }
 
                 // free unmanaged resources (unmanaged objects) and override a finalizer below.

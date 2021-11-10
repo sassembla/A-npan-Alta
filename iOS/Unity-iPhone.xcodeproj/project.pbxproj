@@ -63,6 +63,7 @@
 		80751CAE273A5C590001056E /* SwiftProtobuf in Frameworks */ = {isa = PBXBuildFile; productRef = 80751CAD273A5C590001056E /* SwiftProtobuf */; };
 		80751CB0273A5C590001056E /* SwiftProtobufPluginLibrary in Frameworks */ = {isa = PBXBuildFile; productRef = 80751CAF273A5C590001056E /* SwiftProtobufPluginLibrary */; };
 		80751CB3273A5E250001056E /* A_npan_Alta.pb.swift in Sources */ = {isa = PBXBuildFile; fileRef = 80751CB2273A5E250001056E /* A_npan_Alta.pb.swift */; };
+		80751CB5273B95610001056E /* ListViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 80751CB4273B95610001056E /* ListViewCell.swift */; };
 		80C3471685EE8C6D5E11EEA2 /* Il2CppCodeRegistration.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 6981453A9E1871E484AFEAA4 /* Il2CppCodeRegistration.cpp */; };
 		85BF478096BBF549809FB5D9 /* Il2CppInvokerTable.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A89B4135BEE866BA2DDA755C /* Il2CppInvokerTable.cpp */; };
 		862C245020AEC7AC006FB4AD /* UnityWebRequest.mm in Sources */ = {isa = PBXBuildFile; fileRef = 862C244F20AEC7AC006FB4AD /* UnityWebRequest.mm */; };
@@ -326,6 +327,7 @@
 		80751C9D2737AC0F0001056E /* ListView.storyboard */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; path = ListView.storyboard; sourceTree = "<group>"; };
 		80751C9F2737B6A30001056E /* ListViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ListViewController.swift; sourceTree = "<group>"; };
 		80751CB2273A5E250001056E /* A_npan_Alta.pb.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = A_npan_Alta.pb.swift; path = ../../pb/A_npan_Alta.pb.swift; sourceTree = "<group>"; };
+		80751CB4273B95610001056E /* ListViewCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ListViewCell.swift; sourceTree = "<group>"; };
 		82974CA4988CDA8642D1CD4F /* Mono.Security_CodeGen.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; name = Mono.Security_CodeGen.c; path = Classes/Native/Mono.Security_CodeGen.c; sourceTree = SOURCE_ROOT; };
 		830B5C100E5ED4C100C7819F /* UIKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = UIKit.framework; path = System/Library/Frameworks/UIKit.framework; sourceTree = SDKROOT; };
 		8358D1B70ED1CC3700E3A684 /* AudioToolbox.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AudioToolbox.framework; path = System/Library/Frameworks/AudioToolbox.framework; sourceTree = SDKROOT; };
@@ -712,6 +714,7 @@
 			children = (
 				80751C9D2737AC0F0001056E /* ListView.storyboard */,
 				80751C9F2737B6A30001056E /* ListViewController.swift */,
+				80751CB4273B95610001056E /* ListViewCell.swift */,
 			);
 			path = Views;
 			sourceTree = "<group>";
@@ -1102,6 +1105,7 @@
 				9D25ABB5213FB6E300354C27 /* SplashScreen.mm in Sources */,
 				9D25ABAD213FB6B700354C27 /* AppDelegateListener.mm in Sources */,
 				9D25ABBD213FB6E300354C27 /* UnityViewControllerBase+tvOS.mm in Sources */,
+				80751CB5273B95610001056E /* ListViewCell.swift in Sources */,
 				9D25ABB1213FB6D600354C27 /* UnityView+Keyboard.mm in Sources */,
 				9D25ABC5213FB6F800354C27 /* EAGLContextHelper.mm in Sources */,
 				9D25ABCB213FB6F800354C27 /* UnityReplayKit.mm in Sources */,

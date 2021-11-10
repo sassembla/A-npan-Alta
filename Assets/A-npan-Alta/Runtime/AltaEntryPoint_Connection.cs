@@ -7,7 +7,7 @@ public partial class AltaEntryPoint
     // TODO: ユーザーランドが持つ変化域を保持するところ、ユーザーランド側に持たせたいがとりあえずこちらに。インターフェースとかで露出させられると良い。
     private State currentState;
 
-    public IEnumerator Setup(AltaEntryPoint entryPoint)
+    public IEnumerator Setup()
     {
         var justConnected = false;
         /*
@@ -20,12 +20,12 @@ public partial class AltaEntryPoint
 
         // レシーバのセット
         // TODO: disconnectedとかも検知できたほうがいい。とりあえずの代物で、実際にはSetできる要素を受け付けることはない。
-        entryPoint.onReceived = bytes =>
+        onReceived = bytes =>
         {
             Debug.Log("headからのデータを受け取った:" + bytes.Length + " bytes");
             // TODO: ここで、receiveしたデータペイロードをなんとかする。そろそろ構造化しないとな
         };
-        entryPoint.onConnected = () =>
+        onConnected = () =>
         {
             Debug.Log("接続がきた");
             justConnected = true;
@@ -73,5 +73,10 @@ public partial class AltaEntryPoint
             yield return null;
         }
 
+    }
+
+    public void Shutdown()
+    {
+        server.Dispose();
     }
 }

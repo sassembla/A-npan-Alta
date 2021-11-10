@@ -112,7 +112,7 @@ class AltaHeadConnection_iOS_ws : NSObject, URLSessionWebSocketDelegate {
     }
     
     func urlSession(_ session: URLSession, webSocketTask: URLSessionWebSocketTask, didOpenWithProtocol protocolName: String?) {
-        print("opened")
+        print("opened、このあと接続に失敗した場合のエラーがもしかしたら観測できてないので何とかしないといけない。")
     }
 
     func urlSession(_ session: URLSession, webSocketTask: URLSessionWebSocketTask, didCloseWith closeCode: URLSessionWebSocketTask.CloseCode, reason: Data?) {

@@ -37,6 +37,16 @@ class ListViewController: UIViewController, UITableViewDelegate, UITableViewData
         }()
     ]
     
+    
+    override func viewDidLoad() {
+        super.viewDidLoad()
+        print("ListViewController view did load.")
+    }
+    
+    @IBAction func onTapped(_ sender: Any) {
+        print("onTapped", sender)
+    }
+    
     // 適当なデータを用意、これの初期化をUnity側にやらせればいい。
     private var data:[(title: String, description: String)] = [
         ("AAA", "aaa aaaaa aaaa"),
@@ -49,45 +59,15 @@ class ListViewController: UIViewController, UITableViewDelegate, UITableViewData
         ("HHH", "hhh hhhhh hhhh"),
     ]
     
-    
-    override func viewDidLoad() {
-        super.viewDidLoad()
-        print("ListViewController view did load.")
-        
-        // ここでロード待ちを行う感じになりそう。
-    }
-    
-    @IBAction func onTapped(_ sender: Any) {
-        print("onTapped", sender)
-    }
-    
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
+        // 全体何件って情報は取得しないとダメか。
         return data.count
     }
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        let cell = tableView.dequeueReusableCell(withIdentifier: "cell", for: indexPath)
+        let cell = tableView.dequeueReusableCell(withIdentifier: "cell", for: indexPath) as! ListViewCell
 
-        // Use default settings
-        var content = cell.defaultContentConfiguration()
-
-        // パラメータ類のセット、ここをasyncにできるんだろうか。 既存実装見てみよ
-        content.text = data[indexPath.row].title
-        content.secondaryText = data[indexPath.row].description
-        
-        // 今日のdone
-        if (indexPath.row % 2 == 0) {
-            content.image = UIImage(systemName: "checkmark.square")
-            
-//            TODO: グレーカラーに設定を変えたいが、効いてる節がない。まあとりあえず置いておく。
-//            let configuration = UIImage.SymbolConfiguration(hierarchicalColor: .systemRed)
-//            content.image?.applyingSymbolConfiguration(configuration)
-        } else {
-            content.image = UIImage(systemName: "square")
-        }
-
-        // contentの更新
-        cell.contentConfiguration = content
+        cell.configure(with: indexPath.row)
         
         return cell
     }
@@ -96,7 +76,7 @@ class ListViewController: UIViewController, UITableViewDelegate, UITableViewData
         print("tapされた", indexPath.row)
         tableView.deselectRow(at: indexPath, animated: true)
         
-        // ここからUnity側にリクエストを投げる。 protobufでやろう。定義どうすっかな〜〜、汎用oneofみたいなのが作れれば。データ定義もUnity側からprotoで流れてくるのが理想だなー。partialみたいなので。
+        // ここからUnity側にリクエストを投げる。 protobufでやろう。定義どうすっかな〜〜、汎用oneofみたいなのが作れれば。データ定義もUnity側からprotoで流れてくるのが理想だなー。partialみたいなので。 oneofに定義を足すのがどう？っていうのはあるんだけど、とりあえずそれでやってみるか。型定義でやらないと死ぬ。あとresponseを得るような書き方がしたいな。
         
         var info = Info()
         info.id = Int64(indexPath.row)
